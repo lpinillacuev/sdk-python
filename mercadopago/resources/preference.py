@@ -59,6 +59,23 @@ class Preference(MPBase):
             request_options=request_options,
         )
 
+    def expire(self, preference_id, request_options=None):
+        """Expires the preference identified by *preference_id*.
+
+        Args:
+            preference_id: Required integer path identifier.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Transport response containing the expired preference.
+
+        Reference: PUT /checkout/preferences/{id}/expire
+        """
+        return self._put(
+            uri="/checkout/preferences/" + self._path_param(preference_id) + "/expire",
+            request_options=request_options,
+        )
+
     def create(self, preference_object, request_options=None):
         """Creates a new checkout preference.
 
