@@ -1,7 +1,7 @@
 """Checkout Preference resource for the MercadoPago API.
 
 Wraps ``/checkout/preferences`` endpoints to create, retrieve, update,
-and search payment preferences used by Checkout Pro.
+expire, and search payment preferences used by Checkout Pro.
 
 `API reference <https://www.mercadopago.com/developers/en/reference/online-payments/checkout-pro/preferences/create-preference/post>`_
 """
@@ -56,6 +56,29 @@ class Preference(MPBase):
         return self._put(
             uri="/checkout/preferences/" + self._path_param(preference_id),
             data=preference_object,
+            request_options=request_options,
+        )
+
+    def expire(self, preference_id, request_options=None):
+        """Expires a preference by its ID.
+
+        Args:
+            preference_id: Required integer identifier of the preference to expire.
+            request_options: Per-call configuration overrides.
+
+        Raises:
+            ValueError: If *preference_id* is not an integer.
+
+        Returns:
+            dict: Expired preference object.
+
+        Reference: https://www.mercadopago.com/developers/en/reference/checkout-api/_checkout_preferences_id_expire/put
+        """
+        if not isinstance(preference_id, int):
+            raise ValueError("Param preference_id must be an Integer")
+
+        return self._put(
+            uri="/checkout/preferences/" + self._path_param(preference_id) + "/expire",
             request_options=request_options,
         )
 
