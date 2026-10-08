@@ -10,6 +10,10 @@ from mercadopago.core import MPBase
 from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_iter
 
 
+_PREAPPROVAL_URI = "/preapproval"
+_PREAPPROVAL_SEARCH_URI = "/preapproval/search"
+
+
 class PreApproval(MPBase):
     """Manages plan-less (ad-hoc) subscriptions.
 
@@ -95,6 +99,20 @@ class PreApproval(MPBase):
 
         return self._put(uri="/preapproval/" + self._path_param(preapproval_id),
                          data=preapproval_object, request_options=request_options)
+
+    def export_subscriptions(self, filters, request_options=None):
+        """Exports subscriptions using collector, plan, status, and sort filters.
+
+        The API requires ``collector_id``. Optional filters are
+        ``preapproval_plan_id``, ``status``, and ``sort``.
+        """
+        return self._get(
+            uri="/preapproval/export",
+            filters=filters,
+            request_options=request_options,
+        )
+
+    export = export_subscriptions
 
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
         """Lazily yields all items matching *filters* across all pages."""

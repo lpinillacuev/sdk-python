@@ -11,6 +11,10 @@ from mercadopago.core import MPBase
 from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_iter
 
 
+_PLAN_URI = "/preapproval_plan"
+_PLAN_SEARCH_URI = "/preapproval_plan/search"
+
+
 class Plan(MPBase):
     """Manages subscription plan templates.
 
@@ -32,7 +36,7 @@ class Plan(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/search-preapproval-plan/get
         """
         return self._get(
-            uri="/preapproval_plan/search",
+            uri=_PLAN_SEARCH_URI,
             filters=filters,
             request_options=request_options)
 
@@ -49,7 +53,7 @@ class Plan(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/get-preapproval-plan/get
         """
         return self._get(
-            uri="/preapproval_plan/" + self._path_param(plan_id),
+            uri=_PLAN_URI + "/" + self._path_param(plan_id),
             request_options=request_options)
 
     def create(self, plan_object, request_options=None):

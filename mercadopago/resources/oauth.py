@@ -53,7 +53,11 @@ class OAuth(MPBase):
         return _AUTH_URL + "?" + urlencode(params)
 
     def create(self, oauth_object, request_options=None):
-        """Exchanges an authorization code for an access token.
+        """Creates an OAuth token for any supported grant type.
+
+        Credentials are sent in ``oauth_object``. The OpenAPI operation declares
+        ``security: []``; ``request_options`` is retained for SDK transport and
+        backward compatibility.
 
         Call this after receiving the ``code`` parameter in your
         *redirect_uri* callback.  The returned access token can be used

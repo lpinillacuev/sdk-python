@@ -28,7 +28,9 @@ classifiers = [
 
 [project.optional-dependencies]
 testing = [
-   "unittest"
+    "pytest>=8.0.0,<9",
+    "pytest-cov>=5.0.0,<6",
+    "pylint>=3.0.0,<4",
 ]
 
 [project.urls]

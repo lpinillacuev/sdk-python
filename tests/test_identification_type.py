@@ -15,6 +15,9 @@ class TestIdentificationType(BaseClientTest):
         self.assertIsInstance(result["response"], list)
         self.assertGreater(len(result["response"]), 0)
         self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/v1/identification_types"))
+        self.assertIsNone(call["params"])
 
 
 if __name__ == "__main__":

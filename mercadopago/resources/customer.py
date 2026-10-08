@@ -1,114 +1,101 @@
-"""Customer resource for the MercadoPago API.
+"""Customer and address resources for the MercadoPago API.
 
 Wraps ``/v1/customers`` endpoints to search, retrieve, create, update, and
-delete customer records.  Use alongside :class:`~mercadopago.resources.card.Card`
-to enable one-click payments for returning buyers.
-
-`API reference <https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/create-customer/post>`_
+delete customer records, plus the nested customer-address endpoints.
 """
 from mercadopago.core import MPBase
 from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_iter
 
 
 class Customer(MPBase):
-    """Stores and manages buyer profiles for faster checkout experiences.
-
-    Customer records hold identification, email, and address data.
-    Attach saved cards via the :class:`Card` resource to let returning
-    buyers pay without re-entering card details.
-    """
+    """Stores and manages customer profiles and their addresses."""
 
     def search(self, filters=None, request_options=None):
-        """Searches customers matching the given filters.
-
-        Args:
-            filters: Query-string parameters (e.g. ``email``).
-            request_options: Per-call configuration overrides.
-
-        Returns:
-            dict: Paginated list of matching customers.
-
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/search-customer/get
-        """
-        return self._get(uri="/v1/customers/search", filters=filters,
-                         request_options=request_options)
+        """Searches customers by email and pagination filters."""
+        return self._get(
+            uri="/v1/customers/search",
+            filters=filters,
+            request_options=request_options,
+        )
 
     def get(self, customer_id, request_options=None):
-        """Retrieves a customer by their ID.
-
-        Args:
-            customer_id: Unique customer identifier.
-            request_options: Per-call configuration overrides.
-
-        Returns:
-            dict: Full customer object.
-
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/get-customer/get
-        """
+        """Retrieves a customer by ID."""
         return self._get(
             uri="/v1/customers/" + self._path_param(customer_id),
             request_options=request_options,
         )
 
     def create(self, customer_object, request_options=None):
-        """Creates a new customer record.
-
-        Args:
-            customer_object: Dict with customer data (email, first_name,
-                last_name, identification, etc.).
-            request_options: Per-call configuration overrides.
-
-        Raises:
-            ValueError: If *customer_object* is not a ``dict``.
-
-        Returns:
-            dict: Created customer including its ``id``.
-
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/create-customer/post
-        """
+        """Creates a customer from a request dictionary."""
         if not isinstance(customer_object, dict):
             raise ValueError("Param customer_object must be a Dictionary")
 
-        return self._post(uri="/v1/customers", data=customer_object,
-                          request_options=request_options)
+        return self._post(
+            uri="/v1/customers",
+            data=customer_object,
+            request_options=request_options,
+        )
 
     def update(self, customer_id, customer_object, request_options=None):
-        """Updates an existing customer.
-
-        Args:
-            customer_id: Identifier of the customer to update.
-            customer_object: Dict with the fields to modify.
-            request_options: Per-call configuration overrides.
-
-        Raises:
-            ValueError: If *customer_object* is not a ``dict``.
-
-        Returns:
-            dict: Updated customer object.
-
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/update-customer/put
-        """
+        """Updates a customer from a request dictionary."""
         if not isinstance(customer_object, dict):
             raise ValueError("Param customer_object must be a Dictionary")
 
-        return self._put(uri="/v1/customers/" + self._path_param(customer_id), data=customer_object,
-                         request_options=request_options)
+        return self._put(
+            uri="/v1/customers/" + self._path_param(customer_id),
+            data=customer_object,
+            request_options=request_options,
+        )
 
     def delete(self, customer_id, request_options=None):
-        """Deletes a customer record.
+        """Deletes a customer using the API's nonstandard delete URI."""
+        return self._delete(
+            uri="/v1/customers/" + self._path_param(customer_id) + "/delete",
+            request_options=request_options,
+        )
 
-        Args:
-            customer_id: Identifier of the customer to delete.
-            request_options: Per-call configuration overrides.
+    def create_address(self, customer_id, address_object, request_options=None):
+        """Creates an address for a customer from a request dictionary."""
+        if not isinstance(address_object, dict):
+            raise ValueError("Param address_object must be a Dictionary")
 
-        Returns:
-            dict: Deletion confirmation response.
+        return self._post(
+            uri=f"/v1/customers/{self._path_param(customer_id)}/addresses",
+            data=address_object,
+            request_options=request_options,
+        )
 
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/get-customer/get
-        """
-        return self._delete(uri="/v1/customers/" + self._path_param(customer_id),
-                            request_options=request_options)
+    def list_addresses(self, customer_id, request_options=None):
+        """Lists a customer's addresses."""
+        return self._get(
+            uri=f"/v1/customers/{self._path_param(customer_id)}/addresses",
+            request_options=request_options,
+        )
+
+    def get_address(self, customer_id, address_id, request_options=None):
+        """Retrieves one customer address."""
+        uri = self._address_uri(customer_id, address_id)
+        return self._get(uri=uri, request_options=request_options)
+
+    def update_address(
+        self, customer_id, address_id, address_object, request_options=None
+    ):
+        """Updates a customer address from a request dictionary."""
+        if not isinstance(address_object, dict):
+            raise ValueError("Param address_object must be a Dictionary")
+
+        return self._put(
+            uri=f"/v1/customers/{self._path_param(customer_id)}/addresses/"
+            f"{self._path_param(address_id)}",
+            data=address_object,
+            request_options=request_options,
+        )
+
+    def delete_address(self, customer_id, address_id, request_options=None):
+        """Deletes a customer address and returns the API response."""
+        uri = self._address_uri(customer_id, address_id)
+        return self._delete(uri=uri, request_options=request_options)
 
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
-        """Lazily yields all items matching *filters* across all pages."""
+        """Lazily yields all customers matching filters across all pages."""
         return _paging_iter(self.search, filters, request_options, limit)

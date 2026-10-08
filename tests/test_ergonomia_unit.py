@@ -10,7 +10,6 @@ Tests cover:
 - Status enum constants (TASK-047)
 - Error string constants (TASK-046)
 - DeprecationWarning for notification_url (TASK-047)
-- Idempotency-key length validation (TASK-047)
 - Backward compatibility: result["status"] still works (TASK-018)
 """
 import unittest

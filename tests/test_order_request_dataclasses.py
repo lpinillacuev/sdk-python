@@ -2,9 +2,9 @@
 
 These tests do not hit the live API. They verify:
   * new dataclasses produce the correct snake_case keys,
-  * None filtering (DD-3) removes unset fields,
+  * None filtering removes unset fields,
   * the existing dict path still works (backward compatibility),
-  * the typed Automatic Payments flow serializes correctly.
+  * typed Automatic Payments request serialization.
 """
 import dataclasses
 import json

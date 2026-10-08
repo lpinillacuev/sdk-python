@@ -68,8 +68,9 @@ fields are omitted from the JSON body automatically, matching the `dict` route.
 
 ```python
 import mercadopago
-from mercadopago.resources.order_create import OrderCreateRequest, OrderPayerRequest
-from mercadopago.resources.order_item import OrderItemRequest
+from mercadopago.resources.item import ItemRequest
+from mercadopago.resources.order_create import OrderCreateRequest
+from mercadopago.resources.payer import PayerRequest
 
 sdk = mercadopago.SDK("YOUR_ACCESS_TOKEN")
 
@@ -77,8 +78,8 @@ order = OrderCreateRequest(
     type="online",
     total_amount="100.00",
     external_reference="ext_ref_1234",
-    payer=OrderPayerRequest(email="test_user_123456@testuser.com"),
-    items=[OrderItemRequest(title="A book", unit_price="100.00", quantity=1)],
+    payer=PayerRequest(email="test_user_123456@testuser.com"),
+    items=[ItemRequest(title="A book", unit_price="100.00", quantity=1)],
 )
 
 result = sdk.order().create(order)
@@ -89,7 +90,7 @@ For a complete recurring / Automatic Payments example (stored credential,
 subscription data, integration data), see
 [`examples/order/create_order_automatic_payment.py`](examples/order/create_order_automatic_payment.py).
 
-### Creating a payment (legacy Payments API)
+### Creating a payment (Payments API)
 
 ```python
 import mercadopago

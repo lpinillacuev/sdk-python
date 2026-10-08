@@ -1,4 +1,5 @@
 """Unit tests for the OAuth resource using a mock HTTP client."""
+import json
 import unittest
 from urllib.parse import (
     parse_qs,
@@ -29,6 +30,7 @@ class TestOAuth(BaseClientTest):
         fixture = self.load_fixture("oauth_create.json")
         self.mock_post(fixture, status=200)
         oauth_object = {
+            "client_id": "1234567890",
             "client_secret": "TEST_TOKEN",
             "code": "auth-code-123",
             "redirect_uri": "https://example.com/callback",
@@ -43,11 +45,15 @@ class TestOAuth(BaseClientTest):
         self.assertIn("refresh_token", resp)
         self.assertIn("scope", resp)
         self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/oauth/token"))
+        self.assertEqual(oauth_object, json.loads(call["data"]))
 
     def test_refresh(self):
         fixture = self.load_fixture("oauth_create.json")
         self.mock_post(fixture, status=200)
         oauth_object = {
+            "client_id": "1234567890",
             "client_secret": "TEST_TOKEN",
             "refresh_token": "TG-001-test-refresh-token",
             "grant_type": "refresh_token",
@@ -59,6 +65,9 @@ class TestOAuth(BaseClientTest):
         self.assertIn("token_type", resp)
         self.assertIn("expires_in", resp)
         self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/oauth/token"))
+        self.assertEqual(oauth_object, json.loads(call["data"]))
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):

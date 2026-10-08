@@ -7,7 +7,7 @@ Supported operations: list devices, create payment intent, get payment
 intent, and cancel payment intent.
 
 Note: The ``change_operating_mode`` operation (PATCH
-``/point/integration-api/devices/{self._path_param(device_id)}``) is not included because
+``/point/integration-api/devices/{device_id}``) is not included because
 the Python SDK HTTP client does not currently expose a PATCH method.
 
 `API reference

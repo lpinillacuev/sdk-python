@@ -1,7 +1,8 @@
 """Refund resource for the MercadoPago Payments API.
 
-Wraps ``/v1/payments/{self._path_param(payment_id)}/refunds`` endpoints to list existing
-refunds and create full or partial refunds on approved payments.
+Wraps ``/v1/payments/{payment_id}/refunds`` endpoints to list existing
+refunds, retrieve a refund by ``refund_id``, and create full or partial refunds
+on approved payments.
 
 Refunds are available within 180 days of payment approval and require
 sufficient account balance.
@@ -56,8 +57,9 @@ class Refund(MPBase):
         if refund_object is not None and not isinstance(refund_object, dict):
             raise ValueError("Param refund_object must be a Dictionary")
 
+        data = {} if refund_object is None else refund_object
         return self._post(uri="/v1/payments/" + self._path_param(payment_id) + "/refunds",
-                          data=refund_object, request_options=request_options)
+                          data=data, request_options=request_options)
 
     def get(self, payment_id, refund_id, request_options=None):
         """Retrieves a single refund by its ID.
@@ -73,7 +75,9 @@ class Refund(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api-payments/get-refund/get
         """
         return self._get(
-            uri=f"/v1/payments/{self._path_param(payment_id)}"
-                f"/refunds/{self._path_param(refund_id)}",
+            uri=(
+                f"/v1/payments/{self._path_param(payment_id)}"
+                f"/refunds/{self._path_param(refund_id)}"
+            ),
             request_options=request_options,
         )

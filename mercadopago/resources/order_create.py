@@ -66,7 +66,7 @@ class OrderCreateRequest:
     """Root request body for creating an order.
 
     Optional typed alternative to a plain ``dict``. Convert with
-    ``dataclasses.asdict()``; ``None`` fields are filtered out before sending.
+    :func:`order_request_to_dict`; ``None`` fields are filtered out before sending.
 
     Attributes:
         type: Order type (e.g. ``"online"``). Type: str.

@@ -88,8 +88,8 @@ __all__ = (
 
         return response
 
-    def get(self, url, headers, params=None, timeout=None, maxretries=None):  # pylint: disable=too-many-arguments
-        &#34;&#34;&#34;Makes a GET request to the API&#34;&#34;&#34;
+    def get(self, url, headers, params=None, timeout=None, maxretries=None, retry_on=None):  # pylint: disable=too-many-arguments
+        &#34;&#34;&#34;Makes a GET request to the API with optional retry status overrides.&#34;&#34;&#34;
         return self.request(
             &#34;GET&#34;,
             url=url,
@@ -97,6 +97,7 @@ __all__ = (
             params=params,
             timeout=timeout,
             maxretries=maxretries,
+            retry_on=retry_on,
         )
 
     def post(self, url, headers, data=None, params=None, timeout=None, maxretries=None):  # pylint: disable=too-many-arguments

@@ -17,18 +17,25 @@ class Chargeback(MPBase):
     to disputes.
     """
 
-    def search(self, filters=None, request_options=None):
-        """Searches chargebacks matching the given filters.
+    def update(self, chargeback_id, chargeback_object, request_options=None):
+        """Uploads documentation for a chargeback dispute.
 
         Args:
-            filters: Query-string parameters (e.g. ``payment_id``).
+            chargeback_id: Unique chargeback identifier.
+            chargeback_object: Dict containing the ``files`` documentation list.
             request_options: Per-call configuration overrides.
 
         Returns:
-            dict: Paginated list of matching chargebacks.
+            dict: Updated chargeback response.
         """
-        return self._get(uri="/v1/chargebacks/search", filters=filters,
-                         request_options=request_options)
+        if not isinstance(chargeback_object, dict):
+            raise ValueError("Param chargeback_object must be a Dictionary")
+
+        return self._put(
+            uri="/v1/chargebacks/" + self._path_param(chargeback_id),
+            data=chargeback_object,
+            request_options=request_options,
+        )
 
     def get(self, chargeback_id, request_options=None):
         """Retrieves a chargeback by its ID.

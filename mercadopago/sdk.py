@@ -142,7 +142,7 @@ class SDK:  # pylint: disable=too-many-public-methods
     def order(self, request_options=None):
         """Creates an :class:`Order` resource for the Orders API."""
         return Order(request_options is not None and request_options
-                       or self.request_options, self.http_client)
+                     or self.request_options, self.http_client)
 
     def payment(self, request_options=None):
         """Creates a :class:`Payment` resource for the Checkout API."""

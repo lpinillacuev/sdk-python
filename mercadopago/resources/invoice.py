@@ -11,6 +11,9 @@ method.
 from mercadopago.core import MPBase
 
 
+_INVOICE_URI = "/authorized_payments"
+
+
 class Invoice(MPBase):
     """Provides read access to subscription invoices (authorized payments).
 
@@ -37,7 +40,7 @@ class Invoice(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/get-authorized-payment/get
         """
         return self._get(
-            uri="/authorized_payments/" + self._path_param(invoice_id),
+            uri=_INVOICE_URI + "/" + self._path_param(invoice_id),
             request_options=request_options,
         )
 
@@ -56,7 +59,7 @@ class Invoice(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/authorized-payment-search/get
         """
         return self._get(
-            uri="/authorized_payments/search",
+            uri="/authorized_payments",
             filters=filters,
             request_options=request_options,
         )

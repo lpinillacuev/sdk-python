@@ -10,6 +10,11 @@ plan-based subscriptions.  A subscription links a payer to a
 from mercadopago.core import MPBase
 
 
+_SUBSCRIPTION_URI = "/preapproval"
+_SUBSCRIPTION_SEARCH_URI = "/preapproval/search"
+_SUBSCRIPTION_EXPORT_URI = "/preapproval/export"
+
+
 class Subscription(MPBase):
     """Manages plan-based recurring subscriptions.
 
@@ -32,7 +37,7 @@ class Subscription(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/search-preapproval/get
         """
         return self._get(
-            uri="/preapproval/search",
+            uri=_SUBSCRIPTION_SEARCH_URI,
             filters=filters,
             request_options=request_options)
 
@@ -102,3 +107,17 @@ class Subscription(MPBase):
             uri="/preapproval/" + self._path_param(subscription_id),
             data=subscription_object,
             request_options=request_options)
+
+    def export_subscriptions(self, filters, request_options=None):
+        """Exports subscriptions using collector, plan, status, and sort filters.
+
+        The API requires ``collector_id``. Optional filters are
+        ``preapproval_plan_id``, ``status``, and ``sort``.
+        """
+        return self._get(
+            uri="/preapproval/export",
+            filters=filters,
+            request_options=request_options,
+        )
+
+    export = export_subscriptions

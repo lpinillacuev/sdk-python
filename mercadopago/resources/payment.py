@@ -1,7 +1,7 @@
 """Payment resource for the MercadoPago Checkout API.
 
-Wraps ``/v1/payments`` endpoints to search, retrieve, create, and update
-payments.
+Wraps ``/v1/payments`` endpoints to search, retrieve, create, update, cancel,
+and capture payments.
 
 `API reference <https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api-payments/create-payment/post>`_
 """
@@ -25,8 +25,9 @@ class Payment(MPBase):
         """Searches payments matching the given filters.
 
         Args:
-            filters: Query-string parameters such as ``external_reference``,
-                ``status``, ``date_created``, etc.
+            filters: Query-string parameters documented by the search API,
+                including ``sort``, ``criteria``, date ranges, status, store,
+                point-of-sale, collector/payer IDs, limit, and offset.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -58,9 +59,10 @@ class Payment(MPBase):
         """Creates a new payment.
 
         Args:
-            payment_object: Dict describing the payment (amount, payer,
-                payment_method_id, token, etc.).
-            request_options: Per-call configuration overrides.
+            payment_object: Generic dict containing the documented payment
+                request fields.
+            request_options: Per-call configuration overrides, including an
+                optional ``X-Idempotency-Key`` custom header.
 
         Raises:
             ValueError: If *payment_object* is not a ``dict``.
@@ -79,17 +81,22 @@ class Payment(MPBase):
                 DeprecationWarning,
                 stacklevel=2,
             )
-        return self._post(uri="/v1/payments", data=payment_object, request_options=request_options)
+        return self._post(
+            uri="/v1/payments",
+            data=payment_object,
+            request_options=request_options,
+        )
 
     def update(self, payment_id, payment_object, request_options=None):
-        """Updates an existing payment.
+        """Updates or captures an existing payment.
 
-        Commonly used to change ``status`` (e.g. cancel) or update
-        metadata on a payment that has not yet been captured.
+        The generic dictionary body supports the documented update fields,
+        including ``capture``, ``status``, ``transaction_amount``, and
+        ``date_of_expiration``.
 
         Args:
             payment_id: Identifier of the payment to update.
-            payment_object: Dict with the fields to modify.
+            payment_object: Generic dict with the fields to modify.
             request_options: Per-call configuration overrides.
 
         Raises:
@@ -103,8 +110,33 @@ class Payment(MPBase):
         if not isinstance(payment_object, dict):
             raise ValueError("Param payment_object must be a Dictionary")
 
-        return self._put(uri="/v1/payments/" + self._path_param(payment_id), data=payment_object,
-                         request_options=request_options)
+        return self._put(
+            uri="/v1/payments/" + self._path_param(payment_id),
+            data=payment_object,
+            request_options=request_options,
+        )
+
+    def cancel(self, payment_id, request_options=None):
+        """Cancels a pending or authorized payment through its dedicated endpoint.
+
+        Args:
+            payment_id: Identifier of the payment to cancel.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Cancelled payment object.
+
+        Reference: PUT /v1/payments/{id}/cancellations
+        """
+        return self._put(
+            uri=(
+                "/v1/payments/"
+                + self._path_param(payment_id)
+                + "/cancellations"
+            ),
+            data={"status": "cancelled"},
+            request_options=request_options,
+        )
 
     def capture(self, payment_id, amount=None, request_options=None):
         """Captures an authorized payment.
@@ -123,9 +155,9 @@ class Payment(MPBase):
         payload = {"capture": True}
         if amount is not None:
             payload["transaction_amount"] = amount
-        return self._put(
-            uri="/v1/payments/" + self._path_param(payment_id),
-            data=payload,
+        return self.update(
+            payment_id,
+            payload,
             request_options=request_options,
         )
 

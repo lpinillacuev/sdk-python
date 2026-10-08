@@ -16,15 +16,18 @@ class IdentificationType(MPBase):
     def list_all(self, request_options=None):
         """Retrieves all available identification types.
 
+        This bearer-authenticated catalog operation maps to
+        ``GET /v1/identification_types`` and has no path, query, or
+        request-body parameters.
+
         Args:
-            request_options: Per-call configuration overrides.
+            request_options: Per-call configuration overrides, including
+                bearer authentication headers.
 
         Returns:
             dict: List of identification type objects (id, name, min/max length).
         """
-        return self._get(uri="/v1/identification_types", request_options=request_options)
-
-    @property
-    def request_options(self):
-        """Default :class:`RequestOptions` for this resource instance."""
-        return self.__request_options
+        return self._get(
+            uri="/v1/identification_types",
+            request_options=request_options,
+        )

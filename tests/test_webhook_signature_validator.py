@@ -52,10 +52,8 @@ class TestWebhookSignatureValidator(unittest.TestCase):
         WebhookSignatureValidator.validate(VALID_HEADER, REQUEST_ID, DATA_ID_LOWER, SECRET)
 
     # --- case 2 ---
-    def test_uppercase_dataid_is_preserved(self):
-        upper_hash = compute_hash(DATA_ID_RAW, REQUEST_ID, TS, SECRET)
-        upper_header = build_header(upper_hash)
-        WebhookSignatureValidator.validate(upper_header, REQUEST_ID, DATA_ID_RAW, SECRET)
+    def test_uppercase_dataid_is_normalized(self):
+        WebhookSignatureValidator.validate(VALID_HEADER, REQUEST_ID, DATA_ID_RAW, SECRET)
 
     # --- case 3 ---
     def test_malformed_header_raises_malformed(self):
@@ -138,7 +136,7 @@ class TestWebhookSignatureValidator(unittest.TestCase):
         h = compute_hash(None, None, TS, SECRET)
         WebhookSignatureValidator.validate(build_header(h), "", "  ", SECRET)
 
-    # --- case 12 ---
+    # --- case 12: payment and non-payment identifiers use the same algorithm ---
     def test_non_payment_topic_uses_same_algorithm(self):
         order_id = "ord01abc123"
         h = compute_hash(order_id, REQUEST_ID, TS, SECRET)

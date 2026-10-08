@@ -1,7 +1,7 @@
 """Per-request configuration for MercadoPago API calls.
 
-Holds authentication credentials, timeout, retry policy, and any custom
-or platform-specific headers that should be sent with a request.
+Holds authentication credentials, timeout, retry policy, and custom or
+platform-specific headers sent with a request.
 """
 import uuid
 
@@ -126,11 +126,17 @@ class RequestOptions:  # pylint: disable=too-many-instance-attributes
         if self.__integrator_id is not None:
             headers["x-integrator-id"] = self.__integrator_id
 
-        if self.__platform_id is not None:
-            headers["x-platform-id"] = self.__platform_id
+        platform_id = self.__platform_id
+        if platform_id is not None:
+            headers["x-platform-id"] = platform_id
 
-        if self.__custom_headers is not None:
-            headers.update(self.__custom_headers)
+        custom_headers = self.__custom_headers
+        if custom_headers is not None:
+            custom_headers = dict(custom_headers)
+            custom_idempotency_key = custom_headers.pop("X-Idempotency-Key", None)
+            if custom_idempotency_key is not None:
+                custom_headers["x-idempotency-key"] = custom_idempotency_key
+            headers.update(custom_headers)
 
         return headers
 

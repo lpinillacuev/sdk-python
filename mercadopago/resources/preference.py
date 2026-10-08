@@ -52,10 +52,42 @@ class Preference(MPBase):
         """
         if not isinstance(preference_object, dict):
             raise ValueError("Param preference_object must be a Dictionary")
+        if "notification_url" in preference_object:
+            warnings.warn(
+                "notification_url is deprecated; use Webhooks instead. "
+                "See https://www.mercadopago.com/developers/en/docs/your-integrations/notifications/webhooks",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         return self._put(
             uri="/checkout/preferences/" + self._path_param(preference_id),
             data=preference_object,
+            request_options=request_options,
+        )
+
+    def expire(self, preference_id, request_options=None):
+        """Expires an existing preference.
+
+        Args:
+            preference_id: Integer identifier of the preference to expire.
+            request_options: Per-call configuration overrides.
+
+        Raises:
+            ValueError: If *preference_id* is not an ``int``.
+
+        Returns:
+            dict: Expired preference object.
+
+        Reference: PUT /checkout/preferences/{id}/expire
+        """
+        if type(preference_id) is not int:
+            raise ValueError("Param preference_id must be an Integer")
+
+        return self._put(
+            uri="/checkout/preferences/"
+            + self._path_param(preference_id)
+            + "/expire",
             request_options=request_options,
         )
 

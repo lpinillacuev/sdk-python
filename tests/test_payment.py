@@ -1,4 +1,5 @@
 """Unit tests for the Payment resource using a mock HTTP client."""
+import json
 import unittest
 import warnings
 
@@ -30,7 +31,9 @@ class TestPayment(BaseClientTest):
         self.assertIn("card", resp)
         self.assertEqual("503143", resp["card"]["first_six_digits"])
         self.assertEqual("6351", resp["card"]["last_four_digits"])
-        self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments/17014025134"))
+        self.assertIsNone(call.kwargs["params"])
 
     def test_get_preserves_expanded_gateway_network_data(self):
         self.mock_get(
@@ -57,7 +60,14 @@ class TestPayment(BaseClientTest):
     def test_search(self):
         fixture = self.load_fixture("payment_search.json")
         self.mock_get(fixture)
-        result = self.sdk.payment().search({"status": "approved"})
+        filters = {
+            "sort": "date_created",
+            "criteria": "desc",
+            "status": "approved",
+            "limit": 30,
+            "offset": 0,
+        }
+        result = self.sdk.payment().search(filters)
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertIn("results", resp)
@@ -69,7 +79,9 @@ class TestPayment(BaseClientTest):
         self.assertEqual(17014025134, results[0]["id"])
         self.assertEqual("approved", results[0]["status"])
         self.assertEqual("BRL", results[0]["currency_id"])
-        self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments/search"))
+        self.assertEqual(filters, call.kwargs["params"])
 
     def test_create(self):
         fixture = self.load_fixture("payment_create.json")
@@ -91,7 +103,9 @@ class TestPayment(BaseClientTest):
         self.assertEqual("visa", resp["payment_method_id"])
         self.assertEqual("BRL", resp["currency_id"])
         self.assertFalse(resp["captured"])
-        self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments"))
+        self.assertEqual(payment_object, json.loads(call.kwargs["data"]))
 
     def test_create_with_notification_url_warns(self):
         fixture = self.load_fixture("payment_create.json")
@@ -112,22 +126,28 @@ class TestPayment(BaseClientTest):
     def test_update(self):
         fixture = self.load_fixture("payment_update.json")
         self.mock_put(fixture)
-        result = self.sdk.payment().update(17014025134, {"status": "cancelled"})
+        payment_object = {"status": "cancelled"}
+        result = self.sdk.payment().update(17014025134, payment_object)
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertEqual(17014025134, resp["id"])
         self.assertEqual("cancelled", resp["status"])
         self.assertIn("date_last_updated", resp)
-        self.mock_http.put.assert_called_once()
+        call = self.mock_http.put.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments/17014025134"))
+        self.assertEqual(payment_object, json.loads(call.kwargs["data"]))
 
-    def test_cancel(self):
+    def test_cancel_uses_cancellation_endpoint_and_status_body(self):
         fixture = self.load_fixture("payment_update.json")
         self.mock_put(fixture)
-        result = self.sdk.payment().update(17014025134, {"status": "cancelled"})
+
+        result = self.sdk.payment().cancel(17014025134)
+
         self.assertEqual(200, result["status"])
-        resp = result["response"]
-        self.assertEqual("cancelled", resp["status"])
-        self.mock_http.put.assert_called_once()
+        self.assertEqual("cancelled", result["response"]["status"])
+        call = self.mock_http.put.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments/17014025134/cancellations"))
+        self.assertEqual({"status": "cancelled"}, json.loads(call.kwargs["data"]))
 
     def test_capture(self):
         fixture = self.load_fixture("payment_get.json")
@@ -137,18 +157,28 @@ class TestPayment(BaseClientTest):
         resp = result["response"]
         self.assertEqual(17014025134, resp["id"])
         self.assertEqual("approved", resp["status"])
-        self.mock_http.put.assert_called_once()
+        call = self.mock_http.put.call_args
+        self.assertTrue(call.kwargs["url"].endswith("/v1/payments/17014025134"))
+        self.assertEqual({"capture": True}, json.loads(call.kwargs["data"]))
 
     def test_capture_with_amount(self):
         fixture = self.load_fixture("payment_get.json")
         self.mock_put(fixture)
         result = self.sdk.payment().capture(17014025134, amount=50.0)
         self.assertEqual(200, result["status"])
-        self.mock_http.put.assert_called_once()
+        call = self.mock_http.put.call_args
+        self.assertEqual(
+            {"capture": True, "transaction_amount": 50.0},
+            json.loads(call.kwargs["data"]),
+        )
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):
             self.sdk.payment().create("not-a-dict")
+
+    def test_update_raises_for_non_dict(self):
+        with self.assertRaises(ValueError):
+            self.sdk.payment().update(17014025134, "not-a-dict")
 
 
 if __name__ == "__main__":

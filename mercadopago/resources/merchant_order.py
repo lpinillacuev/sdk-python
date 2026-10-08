@@ -11,6 +11,9 @@ from mercadopago.core import MPBase
 from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_iter
 
 
+_MERCHANT_ORDERS_URI = "/merchant_orders"
+
+
 class MerchantOrder(MPBase):
     """Groups payments into a single merchant-level order.
 
@@ -31,14 +34,14 @@ class MerchantOrder(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-pro/merchant_orders/search-merchant-order/get
         """
-        return self._get(uri="/merchant_orders/search", filters=filters,
+        return self._get(uri=_MERCHANT_ORDERS_URI + "/search", filters=filters,
                          request_options=request_options)
 
-    def get(self, merchan_order_id, request_options=None):
+    def get(self, merchant_order_id, request_options=None):
         """Retrieves a merchant order by its ID.
 
         Args:
-            merchan_order_id: Unique merchant order identifier.
+            merchant_order_id: Unique merchant order identifier.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -46,14 +49,14 @@ class MerchantOrder(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-pro/merchant_orders/get-merchant-order/get
         """
-        return self._get(uri="/merchant_orders/" + self._path_param(merchan_order_id),
+        return self._get(uri="/merchant_orders/" + self._path_param(merchant_order_id),
                          request_options=request_options)
 
-    def update(self, merchan_order_id, merchant_order_object, request_options=None):
+    def update(self, merchant_order_id, merchant_order_object, request_options=None):
         """Updates an existing merchant order.
 
         Args:
-            merchan_order_id: Identifier of the merchant order to update.
+            merchant_order_id: Identifier of the merchant order to update.
             merchant_order_object: Dict with the fields to modify.
             request_options: Per-call configuration overrides.
 
@@ -69,7 +72,7 @@ class MerchantOrder(MPBase):
             raise ValueError(
                 "Param merchant_order_object must be a Dictionary")
 
-        return self._put(uri="/merchant_orders/" + self._path_param(merchan_order_id),
+        return self._put(uri="/merchant_orders/" + self._path_param(merchant_order_id),
                          data=merchant_order_object, request_options=request_options)
 
     def create(self, merchant_order_object, request_options=None):
