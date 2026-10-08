@@ -23,8 +23,3 @@ class IdentificationType(MPBase):
             dict: List of identification type objects (id, name, min/max length).
         """
         return self._get(uri="/v1/identification_types", request_options=request_options)
-
-    @property
-    def request_options(self):
-        """Default :class:`RequestOptions` for this resource instance."""
-        return self.__request_options

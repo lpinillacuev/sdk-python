@@ -46,7 +46,8 @@ class Invoice(MPBase):
 
         Args:
             filters: Query-string parameters such as ``preapproval_id``,
-                ``status``, ``payer_id``, ``offset``, and ``limit``.
+                ``payment_id``, ``payer_id``, ``status``, ``offset``, and
+                ``limit``.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -56,7 +57,7 @@ class Invoice(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/subscriptions/authorized-payment-search/get
         """
         return self._get(
-            uri="/authorized_payments/search",
+            uri="/authorized_payments",
             filters=filters,
             request_options=request_options,
         )

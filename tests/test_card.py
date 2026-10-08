@@ -1,4 +1,5 @@
 """Unit tests for the Card resource using a mock HTTP client."""
+import json
 import unittest
 
 from tests.base_client_test import BaseClientTest
@@ -19,6 +20,12 @@ class TestCard(BaseClientTest):
         self.assertEqual("6351", resp[0]["last_four_digits"])
         self.assertIn("payment_method", resp[0])
         self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/customers/1068193981-pXRewrKqlP6pnn/cards",
+            call["url"],
+        )
+        self.assertEqual("Bearer TEST_TOKEN", call["headers"]["Authorization"])
 
     def test_get(self):
         fixture = self.load_fixture("card_get.json")
@@ -42,6 +49,11 @@ class TestCard(BaseClientTest):
         self.assertIn("date_created", resp)
         self.assertIn("date_last_updated", resp)
         self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/customers/1068193981-pXRewrKqlP6pnn/cards/1562188766852",
+            call["url"],
+        )
 
     def test_create(self):
         fixture = self.load_fixture("card_create.json")
@@ -58,6 +70,13 @@ class TestCard(BaseClientTest):
         self.assertIn("payment_method", resp)
         self.assertIn("issuer", resp)
         self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/customers/1068193981-pXRewrKqlP6pnn/cards",
+            call["url"],
+        )
+        self.assertEqual(card_object, json.loads(call["data"]))
+        self.assertEqual("Bearer TEST_TOKEN", call["headers"]["Authorization"])
 
     def test_update(self):
         fixture = self.load_fixture("card_update.json")
@@ -70,12 +89,23 @@ class TestCard(BaseClientTest):
         self.assertEqual(2030, resp["expiration_year"])
         self.assertIn("date_last_updated", resp)
         self.mock_http.put.assert_called_once()
+        call = self.mock_http.put.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/customers/1068193981-pXRewrKqlP6pnn/cards/1562188766852",
+            call["url"],
+        )
+        self.assertEqual({"expiration_year": 2030}, json.loads(call["data"]))
 
     def test_delete(self):
         self.mock_delete({"id": "1562188766852"}, status=200)
         result = self.sdk.card().delete("1068193981-pXRewrKqlP6pnn", "1562188766852")
         self.assertEqual(200, result["status"])
         self.mock_http.delete.assert_called_once()
+        call = self.mock_http.delete.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/customers/1068193981-pXRewrKqlP6pnn/cards/1562188766852",
+            call["url"],
+        )
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):

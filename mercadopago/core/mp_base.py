@@ -115,14 +115,17 @@ class MPBase:
             retry_on=request_options.retry_on,
         ))
 
-    def _post(self, uri, data=None, params=None, request_options=None):
-        """Performs an authenticated POST request.
+    def _post(
+        self, uri, data=None, params=None, request_options=None, use_access_token=True
+    ):
+        """Performs a POST request.
 
         Args:
             uri: API path relative to the base URL.
             data: Request body dict; JSON-encoded automatically.
             params: Optional query-string parameters.
             request_options: Per-call overrides; falls back to instance defaults.
+            use_access_token: Whether to send the bearer ``Authorization`` header.
 
         Returns:
             dict: ``{"status": <http_code>, "response": <parsed_json>}``.
@@ -133,6 +136,12 @@ class MPBase:
         request_options = self.__check_request_options(request_options)
         headers = self.__check_headers(
             request_options, {"Content-type": self.__config.mime_json})
+        if not use_access_token:
+            headers = {
+                name: value
+                for name, value in headers.items()
+                if name.lower() != "authorization"
+            }
 
         return MPResponse(self.__http_client.post(
             url=self.__config.api_base_url + uri,

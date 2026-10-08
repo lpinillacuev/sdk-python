@@ -104,10 +104,13 @@ class Customer(MPBase):
         Returns:
             dict: Deletion confirmation response.
 
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/get-customer/get
+        Endpoint: ``DELETE /v1/customers/{id}/delete``.
         """
-        return self._delete(uri="/v1/customers/" + self._path_param(customer_id),
-                            request_options=request_options)
+        encoded_customer_id = self._path_param(customer_id)
+        return self._delete(
+            uri="/v1/customers/" + encoded_customer_id + "/delete",
+            request_options=request_options,
+        )
 
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
         """Lazily yields all items matching *filters* across all pages."""

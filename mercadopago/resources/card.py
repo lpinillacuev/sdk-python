@@ -73,8 +73,11 @@ class Card(MPBase):
         if not isinstance(card_object, dict):
             raise ValueError("Param card_object must be a Dictionary")
 
-        return self._post(uri="/v1/customers/" + self._path_param(customer_id)
-                          + "/cards/", data=card_object, request_options=request_options)
+        return self._post(
+            uri=f"/v1/customers/{self._path_param(customer_id)}/cards",
+            data=card_object,
+            request_options=request_options,
+        )
 
     def update(self, customer_id, card_id, card_object, request_options=None):
         """Updates a saved card's details.

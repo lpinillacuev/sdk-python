@@ -1,4 +1,5 @@
 """Unit tests for the Customer resource using a mock HTTP client."""
+import json
 import unittest
 
 from tests.base_client_test import BaseClientTest
@@ -61,12 +62,30 @@ class TestCustomer(BaseClientTest):
         self.assertIn("date_last_updated", resp)
         self.mock_http.put.assert_called_once()
 
-    def test_delete(self):
+    def test_delete_uses_encoded_customer_id_and_delete_suffix(self):
         fixture = self.load_fixture("customer_delete.json")
         self.mock_delete(fixture, status=200)
-        result = self.sdk.customer().delete("1068193981-pXRewrKqlP6pnn")
+        result = self.sdk.customer().delete("customer/id with space")
         self.assertEqual(200, result["status"])
         self.mock_http.delete.assert_called_once()
+        call = self.mock_http.delete.call_args.kwargs
+        self.assertTrue(call["url"].endswith(
+            "/v1/customers/customer%2Fid%20with%20space/delete"
+        ))
+
+    def test_card_create_uses_encoded_customer_id_without_trailing_slash(self):
+        fixture = self.load_fixture("card_create.json")
+        self.mock_post(fixture, status=201)
+        card_object = {"token": "card-token"}
+        result = self.sdk.card().create("customer/id with space", card_object)
+        self.assertEqual(201, result["status"])
+        self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args.kwargs
+        self.assertTrue(call["url"].endswith(
+            "/v1/customers/customer%2Fid%20with%20space/cards"
+        ))
+        self.assertFalse(call["url"].endswith("/"))
+        self.assertEqual(card_object, json.loads(call["data"]))
 
     def test_search(self):
         fixture = self.load_fixture("customer_search.json")

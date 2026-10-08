@@ -107,25 +107,39 @@ class Payment(MPBase):
                          request_options=request_options)
 
     def capture(self, payment_id, amount=None, request_options=None):
-        """Captures an authorized payment.
+        """Captures an authorized payment in full or for a partial amount.
 
         Args:
             payment_id: Identifier of the authorized payment to capture.
-            amount: Amount to capture. If ``None``, the full authorized amount
-                is captured.
+            amount: Optional partial capture amount. Omit for a full capture.
             request_options: Per-call configuration overrides.
 
         Returns:
-            dict: Updated payment object reflecting the captured state.
-
-        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api-payments/update-payment/put
+            dict: Updated payment object reflecting the capture.
         """
-        payload = {"capture": True}
+        payment_object = {"capture": True}
         if amount is not None:
-            payload["transaction_amount"] = amount
+            payment_object["transaction_amount"] = amount
+
         return self._put(
             uri="/v1/payments/" + self._path_param(payment_id),
-            data=payload,
+            data=payment_object,
+            request_options=request_options,
+        )
+
+    def cancel(self, payment_id, request_options=None):
+        """Cancels a pending or authorized payment.
+
+        Args:
+            payment_id: Identifier of the payment to cancel.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Updated payment object reflecting the cancelled state.
+        """
+        return self._put(
+            uri="/v1/payments/" + self._path_param(payment_id) + "/cancellations",
+            data={"status": "cancelled"},
             request_options=request_options,
         )
 
@@ -133,7 +147,7 @@ class Payment(MPBase):
         """Lazily yields every payment matching *filters* across all pages.
 
         Args:
-            filters: Search criteria (e.g. ``{"status": "approved"}``).
+            filters: Search criteria (e.g. ``{\"status\": \"approved\"}``).
             request_options: Per-call configuration overrides.
             limit: Items per page. Defaults to 100.
 

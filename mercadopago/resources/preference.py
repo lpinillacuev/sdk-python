@@ -31,8 +31,10 @@ class Preference(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-pro/preferences/get-preference/get
         """
-        return self._get(uri="/checkout/preferences/" + self._path_param(preference_id),
-                         request_options=request_options)
+        return self._get(
+            uri="/checkout/preferences/" + self._path_param(preference_id),
+            request_options=request_options,
+        )
 
     def update(self, preference_id, preference_object, request_options=None):
         """Updates an existing preference.
@@ -87,10 +89,15 @@ class Preference(MPBase):
                 DeprecationWarning,
                 stacklevel=2,
             )
-        return self._post(uri="/checkout/preferences", data=preference_object,
-                          request_options=request_options)
+        return self._post(
+            uri="/checkout/preferences",
+            data=preference_object,
+            request_options=request_options,
+        )
 
-    def search(self, filters=None, request_options=None):
+    def search(
+        self, filters=None, request_options=None
+    ):
         """Searches preferences matching the given filters.
 
         Args:
@@ -105,6 +112,15 @@ class Preference(MPBase):
 
         return self._get(uri="/checkout/preferences/search", filters=filters,
                          request_options=request_options)
+
+    def expire(
+        self, preference_id, request_options=None
+    ):
+        """Expires a preference by its ID."""
+        return self._put(
+            uri="/checkout/preferences/" + self._path_param(preference_id) + "/expire",
+            request_options=request_options,
+        )
 
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
         """Lazily yields all items matching *filters* across all pages."""

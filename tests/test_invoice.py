@@ -31,6 +31,12 @@ class TestInvoice(BaseClientTest):
         self.assertEqual("inv-001", resp["results"][0]["id"])
         self.assertEqual("processed", resp["results"][0]["status"])
         self.mock_http.get.assert_called_once()
+        _, kwargs = self.mock_http.get.call_args
+        self.assertTrue(kwargs["url"].endswith("/authorized_payments"))
+        self.assertEqual(
+            {"preapproval_id": "2c938084726fca480172750000000000"},
+            kwargs["params"],
+        )
 
 
 if __name__ == "__main__":

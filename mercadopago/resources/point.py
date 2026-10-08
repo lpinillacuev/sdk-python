@@ -3,8 +3,8 @@
 Wraps ``/point/integration-api`` endpoints for in-person payment
 processing through MercadoPago Point devices (card readers).
 
-Supported operations: list devices, create payment intent, get payment
-intent, and cancel payment intent.
+Supported operations: list devices, create, get, and cancel deprecated payment
+intents, and create, get, and cancel Terminals refund intents.
 
 Note: The ``change_operating_mode`` operation (PATCH
 ``/point/integration-api/devices/{self._path_param(device_id)}``) is not included because
@@ -114,10 +114,41 @@ class Point(MPBase):
         Returns:
             dict: Cancellation confirmation.
 
-        Reference: https://www.mercadopago.com/developers/en/reference/in-person-payments/point/orders/cancel-order/post
+        Reference: https://www.mercadopago.com/developers/en/reference/in-person-payments/point/orders/cancel-order/delete
         """
         return self._delete(
             uri="/point/integration-api/devices/" + self._path_param(device_id)
                 + "/payment-intents/" + self._path_param(payment_intent_id),
+            request_options=request_options,
+        )
+
+    def create_refund(self, device_id, refund_intent_object, request_options=None):
+        """Creates a Terminals refund intent on a specific Point device."""
+        if not isinstance(refund_intent_object, dict):
+            raise ValueError("Param refund_intent_object must be a Dictionary")
+
+        return self._post(
+            uri="/point/integration-api/devices/"
+            + self._path_param(device_id)
+            + "/refund",
+            data=refund_intent_object,
+            request_options=request_options,
+        )
+
+    def get_refund(self, refund_intent_id, request_options=None):
+        """Retrieves a Terminals refund intent by its ID."""
+        return self._get(
+            uri="/point/integration-api/refund/"
+            + self._path_param(refund_intent_id),
+            request_options=request_options,
+        )
+
+    def cancel_refund(self, device_id, refund_intent_id, request_options=None):
+        """Cancels a Terminals refund intent on a specific Point device."""
+        return self._delete(
+            uri="/point/integration-api/devices/"
+            + self._path_param(device_id)
+            + "/refund/"
+            + self._path_param(refund_intent_id),
             request_options=request_options,
         )

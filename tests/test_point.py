@@ -68,6 +68,47 @@ class TestPoint(BaseClientTest):
         with self.assertRaises(ValueError):
             self.sdk.point().create("device-001", "not-a-dict")
 
+    def test_create_refund(self):
+        self.mock_post({"id": "refund-intent-001"}, status=200)
+        refund_intent_object = {"payment_id": 123456, "amount": 58.80}
+        result = self.sdk.point().create_refund(
+            "device-001", refund_intent_object
+        )
+        self.assertEqual(200, result["status"])
+        self.assertEqual("refund-intent-001", result["response"]["id"])
+        call = self.mock_http.post.call_args.kwargs
+        self.assertTrue(call["url"].endswith(
+            "/point/integration-api/devices/device-001/refund"
+        ))
+        self.assertEqual(
+            '{"payment_id": 123456, "amount": 58.8}', call["data"]
+        )
+
+    def test_get_refund(self):
+        self.mock_get({"id": "refund-intent-001", "status": "FINISHED"})
+        result = self.sdk.point().get_refund("refund-intent-001")
+        self.assertEqual(200, result["status"])
+        call = self.mock_http.get.call_args.kwargs
+        self.assertTrue(call["url"].endswith(
+            "/point/integration-api/refund/refund-intent-001"
+        ))
+
+    def test_cancel_refund(self):
+        self.mock_delete({"id": "refund-intent-001"}, status=200)
+        result = self.sdk.point().cancel_refund(
+            "device-001", "refund-intent-001"
+        )
+        self.assertEqual(200, result["status"])
+        call = self.mock_http.delete.call_args.kwargs
+        self.assertTrue(call["url"].endswith(
+            "/point/integration-api/devices/device-001/refund/"
+            "refund-intent-001"
+        ))
+
+    def test_create_refund_raises_for_non_dict(self):
+        with self.assertRaises(ValueError):
+            self.sdk.point().create_refund("device-001", "not-a-dict")
+
 
 if __name__ == "__main__":
     unittest.main()
