@@ -14,6 +14,23 @@ from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_i
 from mercadopago.resources.order_create import order_request_to_dict
 
 
+def _request_data(value, parameter_name, optional=False):
+    """Return a plain dict for an Orders request body."""
+    if optional and value is None:
+        return None
+    if is_dataclass(value) and not isinstance(value, type):
+        return order_request_to_dict(value)
+    if not isinstance(value, dict):
+        raise ValueError(f"Param {parameter_name} must be a Dictionary or a dataclass")
+    return value
+
+
+def _require_string(value, parameter_name):
+    """Validate an Orders API path parameter."""
+    if not isinstance(value, str):
+        raise ValueError(f"Param {parameter_name} must be a string")
+
+
 class Order(MPBase):
     """Manages orders and their associated transactions.
 
@@ -75,11 +92,14 @@ class Order(MPBase):
         }
     """
 
-    def search(self, filters=None, request_options=None):
-        """Searches orders matching the given filters.
+    def search(self, begin_date, end_date, filters=None, request_options=None):
+        """Searches orders in the required date range.
 
         Args:
-            filters: Query-string parameters (e.g. ``external_reference``).
+            begin_date: Start of the date range in ISO 8601 format.
+            end_date: End of the date range in ISO 8601 format.
+            filters: Optional query parameters such as ``external_reference``,
+                ``type``, ``status``, ``limit``, and ``offset``.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -87,8 +107,16 @@ class Order(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/search-order/get
         """
-        return self._get(uri="/v1/orders", filters=filters,
-                         request_options=request_options)
+        _require_string(begin_date, "begin_date")
+        _require_string(end_date, "end_date")
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+        query = dict(filters or {})
+        query["begin_date"] = begin_date
+        query["end_date"] = end_date
+        return self._get(
+            uri="/v1/orders", filters=query, request_options=request_options
+        )
 
     def create(self, order_object, request_options=None):
         """Creates a new order.

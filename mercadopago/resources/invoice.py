@@ -12,7 +12,12 @@ from mercadopago.core import MPBase
 
 
 class Invoice(MPBase):
-    """Provides read access to subscription invoices (authorized payments).
+    """Maps the Invoices operations to ``/authorized_payments``.
+
+    HTTP mapping: ``GET /authorized_payments/{id}`` and
+    ``GET /authorized_payments/search``. Search filters are passed unchanged.
+
+    Provides read access to subscription invoices (authorized payments).
 
     Each invoice corresponds to a billing cycle of a
     :class:`~mercadopago.resources.preapproval.PreApproval` and tracks
@@ -45,8 +50,10 @@ class Invoice(MPBase):
         """Searches invoices matching the given filters.
 
         Args:
-            filters: Query-string parameters such as ``preapproval_id``,
-                ``status``, ``payer_id``, ``offset``, and ``limit``.
+            filters: Query-string parameters supported by
+                ``searchAuthorizedPayments``: ``preapproval_id``,
+                ``payment_id``, ``payer_id``, ``status``, ``limit``,
+                and ``offset``.
             request_options: Per-call configuration overrides.
 
         Returns:

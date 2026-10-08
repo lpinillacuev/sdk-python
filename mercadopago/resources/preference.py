@@ -59,7 +59,29 @@ class Preference(MPBase):
             request_options=request_options,
         )
 
-    def create(self, preference_object, request_options=None):
+    def expire(self, preference_id, request_options=None):
+        """Expires an existing preference.
+
+        This API operation does not define an OpenAPI ``operationId``.
+
+        Args:
+            preference_id: Identifier of the preference to expire.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Expired preference object.
+        """
+        return self._put(
+            uri="/checkout/preferences/"
+            + self._path_param(preference_id)
+            + "/expire",
+            data=None,
+            request_options=request_options,
+        )
+
+    def create(
+        self, preference_object, request_options=None
+    ):
         """Creates a new checkout preference.
 
         The response includes ``init_point`` and ``sandbox_init_point``
@@ -90,7 +112,9 @@ class Preference(MPBase):
         return self._post(uri="/checkout/preferences", data=preference_object,
                           request_options=request_options)
 
-    def search(self, filters=None, request_options=None):
+    def search(
+        self, filters=None, request_options=None
+    ):
         """Searches preferences matching the given filters.
 
         Args:

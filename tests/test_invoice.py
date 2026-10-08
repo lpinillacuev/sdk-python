@@ -20,17 +20,37 @@ class TestInvoice(BaseClientTest):
         self.assertEqual("2c938084726fca480172750000000000", resp["preapproval_id"])
         self.assertIn("date_created", resp)
         self.mock_http.get.assert_called_once()
+        _, kwargs = self.mock_http.get.call_args
+        self.assertEqual(
+            "https://api.mercadopago.com/authorized_payments/inv-001",
+            kwargs["url"],
+        )
+        self.assertIsNone(kwargs["params"])
 
     def test_search(self):
         fixture = self.load_fixture("invoice_search.json")
         self.mock_get(fixture)
-        result = self.sdk.invoice().search({"preapproval_id": "2c938084726fca480172750000000000"})
+        filters = {
+            "preapproval_id": "2c938084726fca480172750000000000",
+            "payment_id": 987654321,
+            "payer_id": 123456789,
+            "status": "processed",
+            "limit": 10,
+            "offset": 0,
+        }
+        result = self.sdk.invoice().search(filters)
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertIn("results", resp)
         self.assertEqual("inv-001", resp["results"][0]["id"])
         self.assertEqual("processed", resp["results"][0]["status"])
         self.mock_http.get.assert_called_once()
+        _, kwargs = self.mock_http.get.call_args
+        self.assertEqual(
+            "https://api.mercadopago.com/authorized_payments/search",
+            kwargs["url"],
+        )
+        self.assertEqual(filters, kwargs["params"])
 
 
 if __name__ == "__main__":

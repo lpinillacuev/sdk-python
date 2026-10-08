@@ -18,6 +18,10 @@ class Customer(MPBase):
     buyers pay without re-entering card details.
     """
 
+    _CUSTOMERS_URI = "/v1/customers"
+    _SEARCH_URI = _CUSTOMERS_URI + "/search"
+    _DELETE_SUFFIX = "/delete"
+
     def search(self, filters=None, request_options=None):
         """Searches customers matching the given filters.
 
@@ -30,7 +34,7 @@ class Customer(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/search-customer/get
         """
-        return self._get(uri="/v1/customers/search", filters=filters,
+        return self._get(uri=self._SEARCH_URI, filters=filters,
                          request_options=request_options)
 
     def get(self, customer_id, request_options=None):
@@ -69,7 +73,7 @@ class Customer(MPBase):
         if not isinstance(customer_object, dict):
             raise ValueError("Param customer_object must be a Dictionary")
 
-        return self._post(uri="/v1/customers", data=customer_object,
+        return self._post(uri=self._CUSTOMERS_URI, data=customer_object,
                           request_options=request_options)
 
     def update(self, customer_id, customer_object, request_options=None):
@@ -106,8 +110,60 @@ class Customer(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/customers/get-customer/get
         """
-        return self._delete(uri="/v1/customers/" + self._path_param(customer_id),
-                            request_options=request_options)
+        return self._delete(
+            uri=(self._CUSTOMERS_URI + "/" + self._path_param(customer_id)
+                 + self._DELETE_SUFFIX),
+            request_options=request_options,
+        )
+
+    def create_address(self, customer_id, address_object, request_options=None):
+        """Creates an address for a customer."""
+        if not isinstance(address_object, dict):
+            raise ValueError("Param address_object must be a Dictionary")
+
+        return self._post(
+            uri=("/v1/customers/" + self._path_param(customer_id)
+                 + "/addresses"),
+            data=address_object,
+            request_options=request_options,
+        )
+
+    def list_addresses(self, customer_id, request_options=None):
+        """Lists all addresses for a customer."""
+        return self._get(
+            uri=("/v1/customers/" + self._path_param(customer_id)
+                 + "/addresses"),
+            request_options=request_options,
+        )
+
+    def get_address(self, customer_id, address_id, request_options=None):
+        """Retrieves a customer address by its ID."""
+        return self._get(
+            uri=("/v1/customers/" + self._path_param(customer_id)
+                 + "/addresses/" + self._path_param(address_id)),
+            request_options=request_options,
+        )
+
+    def update_address(self, customer_id, address_id, address_object,
+                       request_options=None):
+        """Updates a customer address."""
+        if not isinstance(address_object, dict):
+            raise ValueError("Param address_object must be a Dictionary")
+
+        return self._put(
+            uri=("/v1/customers/" + self._path_param(customer_id)
+                 + "/addresses/" + self._path_param(address_id)),
+            data=address_object,
+            request_options=request_options,
+        )
+
+    def delete_address(self, customer_id, address_id, request_options=None):
+        """Deletes a customer address."""
+        return self._delete(
+            uri=("/v1/customers/" + self._path_param(customer_id)
+                 + "/addresses/" + self._path_param(address_id)),
+            request_options=request_options,
+        )
 
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
         """Lazily yields all items matching *filters* across all pages."""

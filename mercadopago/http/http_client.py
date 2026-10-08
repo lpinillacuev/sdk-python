@@ -41,7 +41,7 @@ class HttpClient:
         that retry state does not leak between requests.
 
         Args:
-            method: HTTP verb (``GET``, ``POST``, ``PUT``, ``DELETE``).
+            method: HTTP verb (``GET``, ``POST``, ``PUT``, ``PATCH``, ``DELETE``).
             url: Fully-qualified URL to call.
             maxretries: Maximum number of retries on transient errors.
             retry_on: HTTP status codes to retry. Defaults to DEFAULT_RETRY_ON.
@@ -69,14 +69,19 @@ class HttpClient:
             response = {"status": api_result.status_code, "response": None}
 
             if api_result.status_code != 204 and api_result.content:
-                try:
-                    response["response"] = api_result.json()
-                except ValueError as exc:
-                    raise MPServerError(
-                        api_result.status_code,
-                        {"message": "Invalid JSON in response body",
-                         "error": "invalid_response"},
-                    ) from exc
+                content_type = api_result.headers.get("Content-Type", "")
+                binary_content_types = ("text/csv", "application/octet-stream")
+                if any(value in content_type for value in binary_content_types):
+                    response["response"] = api_result.content
+                else:
+                    try:
+                        response["response"] = api_result.json()
+                    except ValueError as exc:
+                        raise MPServerError(
+                            api_result.status_code,
+                            {"message": "Invalid JSON in response body",
+                             "error": "invalid_response"},
+                        ) from exc
 
         return response
 
@@ -103,6 +108,15 @@ class HttpClient:
         """Sends a PUT request to the MercadoPago API."""
         return self.request(
             "PUT", url=url, headers=headers, data=data, params=params,
+            timeout=timeout, maxretries=maxretries, retry_on=retry_on,
+            backoff_factor=backoff_factor,
+        )
+
+    def patch(self, url, headers, data=None, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
+              retry_on=None, backoff_factor=None):
+        """Sends a PATCH request to the MercadoPago API."""
+        return self.request(
+            "PATCH", url=url, headers=headers, data=data, params=params,
             timeout=timeout, maxretries=maxretries, retry_on=retry_on,
             backoff_factor=backoff_factor,
         )

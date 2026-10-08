@@ -36,17 +36,48 @@ class BaseClientTest(unittest.TestCase):
         """Make the next ``http_client.get(...)`` return *response_dict*."""
         self.mock_http.get.return_value = {"status": status, "response": response_dict}
 
+    def mock_get_bytes(self, content, status=200):
+        """Make the next ``http_client.get(...)`` return raw response bytes."""
+        self.mock_http.get.return_value = {"status": status, "response": content}
+
     def mock_post(self, response_dict, status=201):
         """Make the next ``http_client.post(...)`` return *response_dict*."""
+        self.mock_http.post.return_value = {"status": status, "response": response_dict}
+
+    def mock_post_bytes(self, content, status=201):
+        """Make the next ``http_client.post(...)`` return raw response bytes."""
+        self.mock_http.post.return_value = {"status": status, "response": content}
+
+    def mock_post_multipart(self, response_dict, status=201):
+        """Make the next multipart ``http_client.post(...)`` return a response."""
         self.mock_http.post.return_value = {"status": status, "response": response_dict}
 
     def mock_put(self, response_dict, status=200):
         """Make the next ``http_client.put(...)`` return *response_dict*."""
         self.mock_http.put.return_value = {"status": status, "response": response_dict}
 
+    def mock_patch(self, response_dict, status=200):
+        """Make the next ``http_client.patch(...)`` return *response_dict*."""
+        self.mock_http.patch.return_value = {"status": status, "response": response_dict}
+
     def mock_delete(self, response_dict=None, status=204):
         """Make the next ``http_client.delete(...)`` return *response_dict*."""
         self.mock_http.delete.return_value = {"status": status, "response": response_dict}
+
+    def assert_http_call(self, verb, path, data=None, params=None):
+        """Assert the common wire arguments for one resource request."""
+        expected = {
+            "url": "https://api.mercadopago.com" + path,
+            "headers": unittest.mock.ANY,
+            "timeout": 60.0,
+            "maxretries": 3,
+            "retry_on": None,
+        }
+        if verb in ("post", "put"):
+            expected["data"] = data
+        if verb in ("get", "post", "put", "delete"):
+            expected["params"] = params
+        getattr(self.mock_http, verb).assert_called_once_with(**expected)
 
     # ------------------------------------------------------------------
     # Fixture loader exposed to sub-classes

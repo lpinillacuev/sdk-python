@@ -33,12 +33,12 @@ class Card(MPBase):
             request_options=request_options,
         )
 
-    def get(self, customer_id, card_id, request_options=None):
+    def get(self, customer_id, id, request_options=None):  # pylint: disable=redefined-builtin
         """Retrieves a single saved card.
 
         Args:
             customer_id: Owner customer identifier.
-            card_id: Identifier of the card to retrieve.
+            id: Identifier of the card to retrieve.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -47,7 +47,7 @@ class Card(MPBase):
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api/cards/get-card/get
         """
         return self._get(
-            uri=f"/v1/customers/{self._path_param(customer_id)}/cards/{self._path_param(card_id)}",
+            uri=f"/v1/customers/{self._path_param(customer_id)}/cards/{self._path_param(id)}",
             request_options=request_options,
         )
 
@@ -73,15 +73,19 @@ class Card(MPBase):
         if not isinstance(card_object, dict):
             raise ValueError("Param card_object must be a Dictionary")
 
-        return self._post(uri="/v1/customers/" + self._path_param(customer_id)
-                          + "/cards/", data=card_object, request_options=request_options)
+        uri = f"/v1/customers/{self._path_param(customer_id)}/cards"
+        return self._post(
+            uri=uri,
+            data=card_object,
+            request_options=request_options,
+        )
 
-    def update(self, customer_id, card_id, card_object, request_options=None):
+    def update(self, customer_id, id, card_object, request_options=None):  # pylint: disable=redefined-builtin
         """Updates a saved card's details.
 
         Args:
             customer_id: Owner customer identifier.
-            card_id: Identifier of the card to update.
+            id: Identifier of the card to update.
             card_object: Dict with the fields to modify.
             request_options: Per-call configuration overrides.
 
@@ -97,15 +101,15 @@ class Card(MPBase):
             raise ValueError("Param card_object must be a Dictionary")
 
         return self._put(uri="/v1/customers/" + self._path_param(customer_id)
-                         + "/cards/" + self._path_param(card_id), data=card_object,
+                         + "/cards/" + self._path_param(id), data=card_object,
                          request_options=request_options)
 
-    def delete(self, customer_id, card_id, request_options=None):
+    def delete(self, customer_id, id, request_options=None):  # pylint: disable=redefined-builtin
         """Deletes a saved card from a customer profile.
 
         Args:
             customer_id: Owner customer identifier.
-            card_id: Identifier of the card to delete.
+            id: Identifier of the card to delete.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -117,6 +121,6 @@ class Card(MPBase):
             uri="/v1/customers/"
             + self._path_param(customer_id)
             + "/cards/"
-            + self._path_param(card_id),
+            + self._path_param(id),
             request_options=request_options,
         )

@@ -25,6 +25,9 @@ class TestPlan(BaseClientTest):
         self.assertIn("date_created", resp)
         self.assertIn("last_modified", resp)
         self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/preapproval_plan/2c938084726fca480172750000000002"))
+        self.assertIsNone(call["params"])
 
     def test_create(self):
         fixture = self.load_fixture("plan_create.json")
@@ -47,6 +50,9 @@ class TestPlan(BaseClientTest):
         self.assertIn("auto_recurring", resp)
         self.assertIn("init_point", resp)
         self.mock_http.post.assert_called_once()
+        call = self.mock_http.post.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/preapproval_plan"))
+        self.assertIn('"reason": "Monthly Plan - Basic"', call["data"])
 
     def test_update(self):
         fixture = self.load_fixture("plan_update.json")
@@ -58,17 +64,24 @@ class TestPlan(BaseClientTest):
         self.assertEqual("inactive", resp["status"])
         self.assertIn("last_modified", resp)
         self.mock_http.put.assert_called_once()
+        call = self.mock_http.put.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/preapproval_plan/2c938084726fca480172750000000002"))
+        self.assertEqual('{"status": "inactive"}', call["data"])
 
     def test_search(self):
         fixture = self.load_fixture("plan_search.json")
         self.mock_get(fixture)
-        result = self.sdk.plan().search()
+        filters = {"status": "active", "q": "Basic", "sort": "date_created", "criteria": "desc", "limit": 10, "offset": 2}
+        result = self.sdk.plan().search(filters)
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertIn("results", resp)
         self.assertEqual("2c938084726fca480172750000000002", resp["results"][0]["id"])
         self.assertEqual("active", resp["results"][0]["status"])
         self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/preapproval_plan/search"))
+        self.assertEqual(filters, call["params"])
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):

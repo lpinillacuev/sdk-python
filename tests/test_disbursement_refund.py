@@ -1,4 +1,4 @@
-"""Unit tests for the DisbursementRefund resource using a mock HTTP client."""
+"""Unit tests for DisbursementRefund and Payout resources."""
 import unittest
 
 from tests.base_client_test import BaseClientTest

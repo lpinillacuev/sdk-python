@@ -11,7 +11,13 @@ from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_i
 
 
 class PreApproval(MPBase):
-    """Manages plan-less (ad-hoc) subscriptions.
+    """Maps the four base Subscriptions operations to ``/preapproval``.
+
+    HTTP mapping: ``POST /preapproval``, ``GET /preapproval/{id}``,
+    ``PUT /preapproval/{id}``, and ``GET /preapproval/search``. Request data
+    and search filters are passed unchanged.
+
+    Manages plan-less (ad-hoc) subscriptions.
 
     Use this resource when you need full control over subscription terms
     per subscriber instead of using a shared :class:`Plan` template.
@@ -24,7 +30,11 @@ class PreApproval(MPBase):
         """Searches preapprovals matching the given filters.
 
         Args:
-            filters: Query-string parameters.
+            filters: Query-string parameters supported by
+                ``searchSubscriptions``: ``q``, ``payer_id``,
+                ``payer_email``, ``preapproval_plan_id``,
+                ``transaction_amount``, ``semaphore``, ``status``, ``sort``,
+                ``limit``, and ``offset``.
             request_options: Per-call configuration overrides.
 
         Returns:

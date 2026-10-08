@@ -114,13 +114,22 @@ class TestOrder(BaseClientTest):
     def test_search(self):
         fixture = self.load_fixture("order_search.json")
         self.mock_get(fixture)
-        result = self.sdk.order().search()
+        result = self.sdk.order().search(
+            "2024-01-01T00:00:00Z",
+            "2024-01-31T23:59:59Z",
+            {"status": "processed", "limit": 10},
+        )
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertIn("data", resp)
         self.assertIsInstance(resp["data"], list)
         self.assertEqual("01JKXTQ2AZVE0RANCPYA6WBNPW", resp["data"][0]["id"])
-        self.mock_http.get.assert_called_once()
+        call = self.mock_http.get.call_args.kwargs
+        self.assertTrue(call["url"].endswith("/v1/orders"))
+        self.assertEqual("2024-01-01T00:00:00Z", call["params"]["begin_date"])
+        self.assertEqual("2024-01-31T23:59:59Z", call["params"]["end_date"])
+        self.assertEqual("processed", call["params"]["status"])
+        self.assertEqual(10, call["params"]["limit"])
 
     def test_create_transaction(self):
         self.mock_post({"id": "tx-001"}, status=201)

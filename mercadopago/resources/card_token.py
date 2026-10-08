@@ -15,17 +15,17 @@ class CardToken(MPBase):
     exposing sensitive data in your own backend.
     """
 
-    def get(self, card_token_id, request_options=None):
-        """Retrieves a card token by its ID.
+    def get(self, id, request_options=None):  # pylint: disable=redefined-builtin
+        """Retrieves a card token by its ID using bearer authentication.
 
         Args:
-            card_token_id: Unique token identifier.
-            request_options: Per-call configuration overrides.
+            id: Unique token identifier.
+            request_options: Per-call bearer-auth configuration overrides.
 
         Returns:
             dict: Token metadata (last four digits, expiry, etc.).
         """
-        return self._get(uri="/v1/card_tokens/" + self._path_param(card_token_id),
+        return self._get(uri="/v1/card_tokens/" + self._path_param(id),
                          request_options=request_options)
 
     def create(self, card_token_object, request_options=None):
@@ -46,4 +46,4 @@ class CardToken(MPBase):
             raise ValueError("Param card_token_object must be a Dictionary")
 
         return self._post(uri="/v1/card_tokens", data=card_token_object,
-                          request_options=request_options)
+                          request_options=request_options, public_key_auth=True)

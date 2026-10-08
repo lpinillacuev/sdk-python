@@ -12,7 +12,13 @@ from mercadopago.pagination.iterator import search_auto_paging_iter as _paging_i
 
 
 class Plan(MPBase):
-    """Manages subscription plan templates.
+    """Maps the four Plans operations to ``/preapproval_plan``.
+
+    HTTP mapping: ``POST /preapproval_plan``,
+    ``GET /preapproval_plan/{id}``, ``PUT /preapproval_plan/{id}``, and
+    ``GET /preapproval_plan/search``. Search filters are passed unchanged.
+
+    Manages subscription plan templates.
 
     Create a plan once and then attach multiple
     :class:`~mercadopago.resources.subscription.Subscription` instances
@@ -23,7 +29,9 @@ class Plan(MPBase):
         """Searches plans matching the given filters.
 
         Args:
-            filters: Query-string parameters.
+            filters: Query-string parameters supported by
+                ``searchSubscriptionPlans``: ``status``, ``q``, ``sort``,
+                ``criteria``, ``limit``, and ``offset``.
             request_options: Per-call configuration overrides.
 
         Returns:

@@ -7,7 +7,7 @@ from tests.base_client_test import BaseClientTest
 class TestCardToken(BaseClientTest):
     """Test Module: CardToken"""
 
-    def test_get(self):
+    def test_get_uses_bearer_authentication(self):
         fixture = self.load_fixture("card_token_get.json")
         self.mock_get(fixture)
         result = self.sdk.card_token().get("a78sd6f1a9s8d7f1a")
@@ -24,9 +24,15 @@ class TestCardToken(BaseClientTest):
         self.assertIn("date_due", resp)
         self.assertIn("cardholder", resp)
         self.assertEqual("APRO", resp["cardholder"]["name"])
-        self.mock_http.get.assert_called_once()
+        request = self.mock_http.get.call_args.kwargs
+        self.assertEqual(
+            "https://api.mercadopago.com/v1/card_tokens/a78sd6f1a9s8d7f1a",
+            request["url"],
+        )
+        self.assertEqual("Bearer TEST-ACCESS-TOKEN", request["headers"]["Authorization"])
+        self.assertNotIn("X-Public-Key", request["headers"])
 
-    def test_create(self):
+    def test_create_uses_public_key_without_bearer_authentication(self):
         fixture = self.load_fixture("card_token_create.json")
         self.mock_post(fixture, status=201)
         card_token_object = {
@@ -45,7 +51,13 @@ class TestCardToken(BaseClientTest):
         self.assertTrue(resp["luhn_validation"])
         self.assertEqual("active", resp["status"])
         self.assertIn("date_due", resp)
-        self.mock_http.post.assert_called_once()
+        request = self.mock_http.post.call_args.kwargs
+        self.assertEqual("https://api.mercadopago.com/v1/card_tokens", request["url"])
+        self.assertEqual(
+            card_token_object, __import__("json").loads(request["data"])
+        )
+        self.assertEqual("TEST-ACCESS-TOKEN", request["headers"]["X-Public-Key"])
+        self.assertNotIn("Authorization", request["headers"])
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):

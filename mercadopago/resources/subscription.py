@@ -11,7 +11,13 @@ from mercadopago.core import MPBase
 
 
 class Subscription(MPBase):
-    """Manages plan-based recurring subscriptions.
+    """Maps base and export Subscriptions operations to ``/preapproval``.
+
+    HTTP mapping: ``POST /preapproval``, ``GET /preapproval/{id}``,
+    ``PUT /preapproval/{id}``, ``GET /preapproval/search``, and
+    ``GET /preapproval/export``. Request data and filters are passed unchanged.
+
+    Manages plan-based recurring subscriptions.
 
     Each subscription is associated with a :class:`Plan` that defines
     billing frequency and amount.  Use :meth:`create` with a
@@ -22,8 +28,11 @@ class Subscription(MPBase):
         """Searches subscriptions matching the given filters.
 
         Args:
-            filters: Query-string parameters (e.g. ``status``,
-                ``preapproval_plan_id``).
+            filters: Query-string parameters supported by
+                ``searchSubscriptions``: ``q``, ``payer_id``,
+                ``payer_email``, ``preapproval_plan_id``,
+                ``transaction_amount``, ``semaphore``, ``status``, ``sort``,
+                ``limit``, and ``offset``.
             request_options: Per-call configuration overrides.
 
         Returns:
@@ -101,4 +110,29 @@ class Subscription(MPBase):
         return self._put(
             uri="/preapproval/" + self._path_param(subscription_id),
             data=subscription_object,
+            request_options=request_options)
+
+    def export(self, filters, request_options=None):
+        """Exports subscriptions as a raw CSV response.
+
+        Args:
+            filters: Query parameters containing required ``collector_id``
+                and optional ``preapproval_plan_id``, ``status``, and ``sort``.
+            request_options: Per-call configuration overrides.
+
+        Raises:
+            ValueError: If filters is not a dictionary or ``collector_id`` is
+                missing.
+
+        Returns:
+            Response: Raw HTTP response containing the CSV export payload.
+        """
+        if not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+        if "collector_id" not in filters:
+            raise ValueError("Filter collector_id is required")
+
+        return self._get_raw(
+            uri="/preapproval/export",
+            filters=filters,
             request_options=request_options)

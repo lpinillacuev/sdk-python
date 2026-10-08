@@ -18,7 +18,14 @@ class TestRefund(BaseClientTest):
         self.assertEqual(17014025134, resp[0]["payment_id"])
         self.assertEqual(58.80, resp[0]["amount"])
         self.assertEqual("approved", resp[0]["status"])
-        self.mock_http.get.assert_called_once()
+        self.mock_http.get.assert_called_once_with(
+            url="https://api.mercadopago.com/v1/payments/17014025134/refunds",
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_get(self):
         fixture = self.load_fixture("refund_get.json")
@@ -35,7 +42,15 @@ class TestRefund(BaseClientTest):
         self.assertIn("source", resp)
         self.assertEqual("Test User", resp["source"]["name"])
         self.assertEqual("operator", resp["source"]["type"])
-        self.mock_http.get.assert_called_once()
+        self.mock_http.get.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/payments/17014025134/"
+                 "refunds/1091618291"),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_create_full_refund(self):
         fixture = self.load_fixture("refund_create.json")
@@ -48,7 +63,15 @@ class TestRefund(BaseClientTest):
         self.assertEqual(58.80, resp["amount"])
         self.assertEqual("approved", resp["status"])
         self.assertEqual("standard", resp["refund_mode"])
-        self.mock_http.post.assert_called_once()
+        self.mock_http.post.assert_called_once_with(
+            url="https://api.mercadopago.com/v1/payments/17014025134/refunds",
+            data=None,
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_create_partial_refund(self):
         fixture = self.load_fixture("refund_create.json")
@@ -56,7 +79,15 @@ class TestRefund(BaseClientTest):
         result = self.sdk.refund().create(17014025134, {"amount": 50.0})
         self.assertEqual(201, result["status"])
         self.assertIn("date_created", result["response"])
-        self.mock_http.post.assert_called_once()
+        self.mock_http.post.assert_called_once_with(
+            url="https://api.mercadopago.com/v1/payments/17014025134/refunds",
+            data='{"amount": 50.0}',
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_create_raises_for_non_dict_refund_object(self):
         with self.assertRaises(ValueError):

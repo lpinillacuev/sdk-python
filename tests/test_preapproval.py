@@ -27,6 +27,9 @@ class TestPreApproval(BaseClientTest):
         self.assertIn("init_point", resp)
         self.assertIn("date_created", resp)
         self.mock_http.get.assert_called_once()
+        _, kwargs = self.mock_http.get.call_args
+        self.assertEqual("https://api.mercadopago.com/preapproval/2c938084726fca480172750000000000", kwargs["url"])
+        self.assertIsNone(kwargs["params"])
 
     def test_create(self):
         fixture = self.load_fixture("preapproval_create.json")

@@ -106,7 +106,25 @@ class Payment(MPBase):
         return self._put(uri="/v1/payments/" + self._path_param(payment_id), data=payment_object,
                          request_options=request_options)
 
-    def capture(self, payment_id, amount=None, request_options=None):
+    def cancel(self, payment_id, request_options=None):
+        """Cancels a payment by its ID.
+
+        Args:
+            payment_id: Identifier of the payment to cancel.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Cancelled payment object.
+        """
+        return self._put(
+            uri="/v1/payments/" + self._path_param(payment_id) + "/cancellations",
+            data={"status": "cancelled"},
+            request_options=request_options,
+        )
+
+    def capture(
+        self, payment_id, amount=None, request_options=None
+    ):
         """Captures an authorized payment.
 
         Args:

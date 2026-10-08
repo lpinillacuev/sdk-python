@@ -66,6 +66,39 @@ class TestSubscription(BaseClientTest):
         self.assertEqual("test_user@testuser.com", resp["results"][0]["payer_email"])
         self.mock_http.get.assert_called_once()
 
+    def test_export_uses_exact_filters_and_returns_raw_csv(self):
+        filters = {
+            "collector_id": 123456789,
+            "preapproval_plan_id": "2c938084726fca480172750000000002",
+            "status": "authorized",
+            "sort": "last_modified",
+        }
+        csv_response = unittest.mock.Mock()
+        csv_response.content = b"id,status\nsub-1,authorized\n"
+        csv_response.text = "id,status\nsub-1,authorized\n"
+        self.mock_http.get.return_value = csv_response
+
+        result = self.sdk.subscription().export(filters)
+
+        self.assertIs(csv_response, result)
+        _, kwargs = self.mock_http.get.call_args
+        self.assertEqual("https://api.mercadopago.com/preapproval/export", kwargs["url"])
+        self.assertEqual(filters, kwargs["params"])
+        self.assertEqual("text/csv", kwargs["headers"]["Accept"])
+        self.assertEqual(b"id,status\nsub-1,authorized\n", result.content)
+
+    def test_export_requires_collector_id(self):
+        with self.assertRaises(ValueError):
+            self.sdk.subscription().export({"status": "authorized"})
+
+        self.mock_http.get.assert_not_called()
+
+    def test_export_raises_for_non_dict_filters(self):
+        with self.assertRaises(ValueError):
+            self.sdk.subscription().export("collector_id=123456789")
+
+        self.mock_http.get.assert_not_called()
+
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):
             self.sdk.subscription().create("not-a-dict")

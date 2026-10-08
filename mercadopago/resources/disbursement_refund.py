@@ -1,9 +1,4 @@
-"""Disbursement Refund resource for the MercadoPago Marketplace API.
-
-Wraps ``/v1/advanced_payments/{id}/refunds`` and
-``/v1/advanced_payments/{id}/disbursements/{id}/refunds`` endpoints
-to refund individual or all disbursements within an advanced payment.
-"""
+"""Disbursement refund, Payouts, and Transaction Intents resources."""
 from mercadopago.core import MPBase
 
 

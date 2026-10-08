@@ -1,7 +1,8 @@
 """Refund resource for the MercadoPago Payments API.
 
-Wraps ``/v1/payments/{self._path_param(payment_id)}/refunds`` endpoints to list existing
-refunds and create full or partial refunds on approved payments.
+Wraps ``/v1/payments/{id}/refunds`` and
+``/v1/payments/{id}/refunds/{refund_id}`` endpoints to create, list, and
+retrieve refunds on approved payments.
 
 Refunds are available within 180 days of payment approval and require
 sufficient account balance.
@@ -31,33 +32,38 @@ class Refund(MPBase):
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api-payments/get-refunds/get
         """
-        return self._get(uri="/v1/payments/" + self._path_param(payment_id) + "/refunds",
-                         request_options=request_options)
+        return self._get(
+            uri=f"/v1/payments/{self._path_param(payment_id)}/refunds",
+            request_options=request_options,
+        )
 
-    def create(self, payment_id, refund_object=None, request_options=None):
+    def create(self, payment_id, refund_request=None, request_options=None):
         """Creates a refund for a payment.
 
-        Omit *refund_object* for a full refund, or pass
-        ``{"amount": <float>}`` for a partial refund.
+        Omit *refund_request* for a full refund, or pass a ``RefundRequest``
+        dictionary such as ``{"amount": <float>}`` for a partial refund.
 
         Args:
             payment_id: Identifier of the payment to refund.
-            refund_object: Optional dict with partial refund details.
+            refund_request: Optional RefundRequest dictionary.
             request_options: Per-call configuration overrides.
 
         Raises:
-            ValueError: If *refund_object* is provided but not a ``dict``.
+            ValueError: If *refund_request* is provided but not a ``dict``.
 
         Returns:
             dict: Created refund including its ``id`` and ``status``.
 
         Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-api-payments/create-refund/post
         """
-        if refund_object is not None and not isinstance(refund_object, dict):
-            raise ValueError("Param refund_object must be a Dictionary")
+        if refund_request is not None and not isinstance(refund_request, dict):
+            raise ValueError("Param refund_request must be a Dictionary")
 
-        return self._post(uri="/v1/payments/" + self._path_param(payment_id) + "/refunds",
-                          data=refund_object, request_options=request_options)
+        return self._post(
+            uri=f"/v1/payments/{self._path_param(payment_id)}/refunds",
+            data=refund_request,
+            request_options=request_options,
+        )
 
     def get(self, payment_id, refund_id, request_options=None):
         """Retrieves a single refund by its ID.

@@ -68,6 +68,60 @@ class TestPoint(BaseClientTest):
         with self.assertRaises(ValueError):
             self.sdk.point().create("device-001", "not-a-dict")
 
+    def test_sdk_exposes_terminals_resource(self):
+        self.assertEqual("Terminals", self.sdk.terminals().__class__.__name__)
+
+    def test_terminal_bodies_must_be_dicts(self):
+        with self.assertRaises(ValueError):
+            self.sdk.terminals().update_operation_mode("not-a-dict")
+        with self.assertRaises(ValueError):
+            self.sdk.terminals().create_refund("device-001", "not-a-dict")
+        with self.assertRaises(ValueError):
+            self.sdk.terminals().create_action("not-a-dict")
+
+    def test_point_methods_use_exact_deprecated_paths(self):
+        self.mock_get({"devices": []})
+        self.sdk.point().get_devices()
+        self.mock_http.get.assert_called_once_with(
+            url="https://api.mercadopago.com/point/integration-api/devices",
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
+
+        self.mock_http.reset_mock()
+        self.mock_post({"id": "intent-001"}, status=201)
+        body = {"amount": 1500}
+        self.sdk.point().create("device/id", body)
+        self.mock_http.post.assert_called_once_with(
+            url=("https://api.mercadopago.com/point/integration-api/devices/"
+                 "device%2Fid/payment-intents"),
+            data='{"amount": 1500}',
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
+
+        self.mock_http.reset_mock()
+        self.mock_get({"id": "intent-001"})
+        self.sdk.point().get("intent/id")
+        self.assertIn(
+            "/point/integration-api/payment-intents/intent%2Fid",
+            self.mock_http.get.call_args.kwargs["url"],
+        )
+
+        self.mock_http.reset_mock()
+        self.mock_delete({"id": "intent-001"})
+        self.sdk.point().cancel("device/id", "intent/id")
+        self.assertIn(
+            "/point/integration-api/devices/device%2Fid/payment-intents/intent%2Fid",
+            self.mock_http.delete.call_args.kwargs["url"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

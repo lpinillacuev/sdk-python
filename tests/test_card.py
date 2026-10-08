@@ -1,4 +1,5 @@
 """Unit tests for the Card resource using a mock HTTP client."""
+import json
 import unittest
 
 from tests.base_client_test import BaseClientTest
@@ -18,7 +19,15 @@ class TestCard(BaseClientTest):
         self.assertEqual("503143", resp[0]["first_six_digits"])
         self.assertEqual("6351", resp[0]["last_four_digits"])
         self.assertIn("payment_method", resp[0])
-        self.mock_http.get.assert_called_once()
+        self.mock_http.get.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/customers/"
+                 "1068193981-pXRewrKqlP6pnn/cards"),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_get(self):
         fixture = self.load_fixture("card_get.json")
@@ -41,7 +50,15 @@ class TestCard(BaseClientTest):
         self.assertIn("security_code", resp)
         self.assertIn("date_created", resp)
         self.assertIn("date_last_updated", resp)
-        self.mock_http.get.assert_called_once()
+        self.mock_http.get.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/customers/"
+                 "1068193981-pXRewrKqlP6pnn/cards/1562188766852"),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_create(self):
         fixture = self.load_fixture("card_create.json")
@@ -57,25 +74,52 @@ class TestCard(BaseClientTest):
         self.assertIn("cardholder", resp)
         self.assertIn("payment_method", resp)
         self.assertIn("issuer", resp)
-        self.mock_http.post.assert_called_once()
+        self.mock_http.post.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/customers/"
+                 "1068193981-pXRewrKqlP6pnn/cards"),
+            data=json.dumps(card_object),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_update(self):
         fixture = self.load_fixture("card_update.json")
         self.mock_put(fixture)
+        card_object = {"expiration_year": 2030}
         result = self.sdk.card().update(
-            "1068193981-pXRewrKqlP6pnn", "1562188766852", {"expiration_year": 2030})
+            "1068193981-pXRewrKqlP6pnn", "1562188766852", card_object)
         self.assertEqual(200, result["status"])
         resp = result["response"]
         self.assertEqual("1562188766852", resp["id"])
         self.assertEqual(2030, resp["expiration_year"])
         self.assertIn("date_last_updated", resp)
-        self.mock_http.put.assert_called_once()
+        self.mock_http.put.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/customers/"
+                 "1068193981-pXRewrKqlP6pnn/cards/1562188766852"),
+            data=json.dumps(card_object),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_delete(self):
         self.mock_delete({"id": "1562188766852"}, status=200)
         result = self.sdk.card().delete("1068193981-pXRewrKqlP6pnn", "1562188766852")
         self.assertEqual(200, result["status"])
-        self.mock_http.delete.assert_called_once()
+        self.mock_http.delete.assert_called_once_with(
+            url=("https://api.mercadopago.com/v1/customers/"
+                 "1068193981-pXRewrKqlP6pnn/cards/1562188766852"),
+            params=None,
+            headers=unittest.mock.ANY,
+            timeout=60.0,
+            maxretries=3,
+            retry_on=None,
+        )
 
     def test_create_raises_for_non_dict(self):
         with self.assertRaises(ValueError):
@@ -84,6 +128,16 @@ class TestCard(BaseClientTest):
     def test_update_raises_for_non_dict(self):
         with self.assertRaises(ValueError):
             self.sdk.card().update("1068193981-pXRewrKqlP6pnn", "1562188766852", "not-a-dict")
+
+    def test_customer_and_card_ids_are_path_encoded(self):
+        self.mock_get({"id": "card-id"})
+
+        self.sdk.card().get("customer/with/slashes", "card/with/slashes")
+
+        request = self.mock_http.get.call_args.kwargs
+        self.assertTrue(request["url"].endswith(
+            "/v1/customers/customer%2Fwith%2Fslashes/cards/card%2Fwith%2Fslashes"
+        ))
 
 
 if __name__ == "__main__":

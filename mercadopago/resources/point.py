@@ -1,17 +1,7 @@
-"""Point resource for the MercadoPago Point Integration API.
+"""Point and Terminals resources for in-person payment operations.
 
-Wraps ``/point/integration-api`` endpoints for in-person payment
-processing through MercadoPago Point devices (card readers).
-
-Supported operations: list devices, create payment intent, get payment
-intent, and cancel payment intent.
-
-Note: The ``change_operating_mode`` operation (PATCH
-``/point/integration-api/devices/{self._path_param(device_id)}``) is not included because
-the Python SDK HTTP client does not currently expose a PATCH method.
-
-`API reference
-<https://www.mercadopago.com/developers/en/reference/in-person-payments/point/orders/create-order/post>`_
+Wraps the deprecated ``/point/integration-api`` payment-intent API and the
+current terminal, refund-intent, and print-action endpoints.
 """
 from mercadopago.core import MPBase
 
@@ -23,6 +13,11 @@ class Point(MPBase):
     that are sent to a physical Point device for the buyer to complete
     the transaction by inserting or tapping their card.
     """
+
+    @staticmethod
+    def _require_dict(value, name):
+        if not isinstance(value, dict):
+            raise ValueError("Param " + name + " must be a Dictionary")
 
     def get_devices(self, filters=None, request_options=None):
         """Lists Point devices linked to the authenticated account.
@@ -119,5 +114,84 @@ class Point(MPBase):
         return self._delete(
             uri="/point/integration-api/devices/" + self._path_param(device_id)
                 + "/payment-intents/" + self._path_param(payment_intent_id),
+            request_options=request_options,
+        )
+
+
+class Terminals(MPBase):
+    """Manages Point terminals, refund intents, and print actions."""
+
+    @staticmethod
+    def _require_dict(value, name):
+        if not isinstance(value, dict):
+            raise ValueError("Param " + name + " must be a Dictionary")
+
+    def list(self, request_options=None):
+        """Lists terminals linked to the authenticated account."""
+        return self._get(
+            uri="/terminals/v1/list",
+            request_options=request_options,
+        )
+
+    def update_operation_mode(self, setup_object, request_options=None):
+        """Updates the operating mode of one or more terminals."""
+        self._require_dict(setup_object, "setup_object")
+        return self._patch(
+            uri="/terminals/v1/setup",
+            data=setup_object,
+            request_options=request_options,
+        )
+
+    def create_refund(self, device_id, refund_object, request_options=None):
+        """Creates a refund intent on a terminal."""
+        self._require_dict(refund_object, "refund_object")
+        return self._post(
+            uri="/point/integration-api/devices/"
+            + self._path_param(device_id)
+            + "/refund",
+            data=refund_object,
+            request_options=request_options,
+        )
+
+    def cancel_refund(self, device_id, refund_intent_id, request_options=None):
+        """Cancels a refund intent on a terminal."""
+        return self._delete(
+            uri="/point/integration-api/devices/"
+            + self._path_param(device_id)
+            + "/refund/"
+            + self._path_param(refund_intent_id),
+            request_options=request_options,
+        )
+
+    def get_refund(self, refund_intent_id, request_options=None):
+        """Gets a refund intent by identifier."""
+        return self._get(
+            uri="/point/integration-api/refund/"
+            + self._path_param(refund_intent_id),
+            request_options=request_options,
+        )
+
+    def create_action(self, action_object, request_options=None):
+        """Creates a terminal print action."""
+        self._require_dict(action_object, "action_object")
+        return self._post(
+            uri="/terminals/v1/actions",
+            data=action_object,
+            request_options=request_options,
+        )
+
+    def get_action(self, action_id, request_options=None):
+        """Gets a terminal action by identifier."""
+        return self._get(
+            uri="/terminals/v1/actions/" + self._path_param(action_id),
+            request_options=request_options,
+        )
+
+    def cancel_action(self, action_id, request_options=None):
+        """Cancels a terminal action."""
+        return self._post(
+            uri="/terminals/v1/actions/"
+            + self._path_param(action_id)
+            + "/cancel",
             request_options=request_options,
         )

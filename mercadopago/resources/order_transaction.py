@@ -72,10 +72,10 @@ class OrderPaymentRequest:
 
 @dataclass
 class OrderTransactionRequest:
-    """Transactions payload for an order creation request.
+    """Transactions payload for order creation or transaction addition.
 
-    Attributes:
-        payments: List of payment transactions for the order.
+    ``payments`` is the required top-level field for
+    ``POST /v1/orders/{order_id}/transactions``.
     """
 
     payments: Optional[List[OrderPaymentRequest]] = None

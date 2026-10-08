@@ -1,28 +1,20 @@
-"""Identification Type resource for the MercadoPago API.
-
-Wraps the ``/v1/identification_types`` endpoint to retrieve the list of
-accepted document types (e.g. CPF, CNPJ, DNI) for each country.
-"""
+"""Identification Type resource for the MercadoPago API."""
 from mercadopago.core import MPBase
 
 
 class IdentificationType(MPBase):
-    """Lists accepted identification document types by country.
-
-    Use the returned types to populate document-type selectors in your
-    checkout form so buyers can provide a valid identification.
-    """
+    """Lists identification types for the authenticated credential's site."""
 
     def list_all(self, request_options=None):
-        """Retrieves all available identification types.
+        """Retrieves the identification-type catalog.
 
-        Args:
-            request_options: Per-call configuration overrides.
-
-        Returns:
-            dict: List of identification type objects (id, name, min/max length).
+        The bearer-authenticated operation has no path, query, or body
+        parameters and returns the catalog for the credential's site.
         """
-        return self._get(uri="/v1/identification_types", request_options=request_options)
+        return self._get(
+            uri="/v1/identification_types",
+            request_options=request_options,
+        )
 
     @property
     def request_options(self):
