@@ -70,6 +70,21 @@ class TestPreference(BaseClientTest):
         self.assertIn("items", resp)
         self.mock_http.put.assert_called_once()
 
+    def test_expire(self):
+        fixture = self.load_fixture("preference_update.json")
+        self.mock_put(fixture)
+        result = self.sdk.preference().expire(843382748)
+        self.assertEqual(200, result["status"])
+        resp = result["response"]
+        self.assertEqual("843382748-18d90a57-a4ce-4718-bc17-1234567890", resp["id"])
+        self.mock_http.put.assert_called_once()
+        self.assertEqual(
+            "https://api.mercadopago.com/checkout/preferences/843382748/expire",
+            self.mock_http.put.call_args.kwargs["url"],
+        )
+        self.assertIsNone(self.mock_http.put.call_args.kwargs["data"])
+        self.assertIsNone(self.mock_http.put.call_args.kwargs["params"])
+
     def test_search(self):
         fixture = self.load_fixture("preference_search.json")
         self.mock_get(fixture)

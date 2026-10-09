@@ -59,6 +59,29 @@ class Preference(MPBase):
             request_options=request_options,
         )
 
+    def expire(self, preference_id, request_options=None):
+        """Expires a preference by its ID.
+
+        Args:
+            preference_id: Integer identifier of the preference to expire.
+            request_options: Per-call configuration overrides.
+
+        Raises:
+            ValueError: If *preference_id* is not an integer.
+
+        Returns:
+            dict: Expired preference object.
+
+        Reference: https://www.mercadopago.com/developers/en/reference/online-payments/checkout-pro/preferences/expire-preference/put
+        """
+        if isinstance(preference_id, bool) or not isinstance(preference_id, int):
+            raise ValueError("Param preference_id must be an Integer")
+
+        return self._put(
+            uri=f"/checkout/preferences/{self._path_param(preference_id)}/expire",
+            request_options=request_options,
+        )
+
     def create(self, preference_object, request_options=None):
         """Creates a new checkout preference.
 
