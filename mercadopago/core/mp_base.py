@@ -163,6 +163,25 @@ class MPBase:
             retry_on=request_options.retry_on,
         ))
 
+    def _patch(self, uri, data=None, params=None, request_options=None):
+        """Performs an authenticated PATCH request with a JSON body."""
+        if data is not None:
+            data = JSONEncoder().encode(data)
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(
+            request_options, {"Content-type": self.__config.mime_json})
+
+        return MPResponse(self.__http_client.patch(
+            url=self.__config.api_base_url + uri,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
     def _delete(self, uri, params=None, request_options=None):
         """Performs an authenticated DELETE request.
 

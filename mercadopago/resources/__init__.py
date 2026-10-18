@@ -60,6 +60,7 @@ from mercadopago.resources.plan import Plan
 from mercadopago.resources.point import Point
 from mercadopago.resources.preapproval import PreApproval
 from mercadopago.resources.preference import Preference
+from mercadopago.resources.qr_integrator import QRIntegrator
 from mercadopago.resources.refund import Refund
 from mercadopago.resources.shipment import (
     ShipmentAddress,
@@ -116,6 +117,7 @@ __all__ = (
     'Point',
     'PreApproval',
     'Preference',
+    'QRIntegrator',
     'Refund',
     'RequestOptions',
     'Subscription',

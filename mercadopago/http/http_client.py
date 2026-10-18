@@ -107,6 +107,15 @@ class HttpClient:
             backoff_factor=backoff_factor,
         )
 
+    def patch(self, url, headers, data=None, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
+              retry_on=None, backoff_factor=None):
+        """Sends a PATCH request to the MercadoPago API."""
+        return self.request(
+            "PATCH", url=url, headers=headers, data=data, params=params,
+            timeout=timeout, maxretries=maxretries, retry_on=retry_on,
+            backoff_factor=backoff_factor,
+        )
+
     def delete(self, url, headers, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
                retry_on=None, backoff_factor=None):
         """Sends a DELETE request to the MercadoPago API."""
