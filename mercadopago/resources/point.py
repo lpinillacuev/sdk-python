@@ -121,3 +121,36 @@ class Point(MPBase):
                 + "/payment-intents/" + self._path_param(payment_intent_id),
             request_options=request_options,
         )
+
+    def create_point_refund_intent(self, device_id, refund_intent_object, request_options=None):
+        """Creates a refund intent for a payment on a Point device.
+
+        ``refund_intent_object`` must contain ``payment_id`` and may
+        contain ``amount`` for a partial refund.
+        """
+        if not isinstance(refund_intent_object, dict):
+            raise ValueError("Param refund_intent_object must be a Dictionary")
+        if "payment_id" not in refund_intent_object:
+            raise ValueError("Param refund_intent_object must contain payment_id")
+
+        return self._post(
+            uri="/point/integration-api/devices/" + self._path_param(device_id)
+                + "/refund",
+            data=refund_intent_object,
+            request_options=request_options,
+        )
+
+    def cancel_point_refund_intent(self, device_id, refund_intent_id, request_options=None):
+        """Cancels a refund intent on the specified Point device."""
+        return self._delete(
+            uri="/point/integration-api/devices/" + self._path_param(device_id)
+                + "/refund/" + self._path_param(refund_intent_id),
+            request_options=request_options,
+        )
+
+    def get_point_refund_intent(self, refund_intent_id, request_options=None):
+        """Retrieves a refund intent and its status by ID."""
+        return self._get(
+            uri="/point/integration-api/refund/" + self._path_param(refund_intent_id),
+            request_options=request_options,
+        )
