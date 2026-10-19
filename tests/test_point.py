@@ -68,6 +68,43 @@ class TestPoint(BaseClientTest):
         with self.assertRaises(ValueError):
             self.sdk.point().create("device-001", "not-a-dict")
 
+    def test_create_point_refund_intent(self):
+        self.mock_post({"id": "refund-001", "status": "OPEN"}, status=200)
+        result = self.sdk.point().create_point_refund_intent(
+            "device-001", {"payment_id": 12345, "amount": 25.50})
+        self.assertEqual(200, result["status"])
+        self.assertEqual("refund-001", result["response"]["id"])
+        self.assertEqual("OPEN", result["response"]["status"])
+        self.mock_http.post.assert_called_once()
+        kwargs = self.mock_http.post.call_args.kwargs
+        self.assertEqual("https://api.mercadopago.com/point/integration-api/"
+                         "devices/device-001/refund", kwargs["url"])
+        self.assertEqual({"payment_id": 12345, "amount": 25.50},
+                         __import__("json").loads(kwargs["data"]))
+        self.assertEqual("application/json", kwargs["headers"]["Content-type"])
+
+    def test_cancel_point_refund_intent(self):
+        self.mock_delete({"id": "refund-001"}, status=200)
+        result = self.sdk.point().cancel_point_refund_intent(
+            "device-001", "refund-001")
+        self.assertEqual(200, result["status"])
+        self.mock_http.delete.assert_called_once()
+        self.assertEqual("https://api.mercadopago.com/point/integration-api/"
+                         "devices/device-001/refund/refund-001",
+                         self.mock_http.delete.call_args.kwargs["url"])
+
+    def test_get_point_refund_intent(self):
+        response = {"id": "refund-001", "status": "OPEN",
+                    "payment_id": 12345, "amount": 25.50}
+        self.mock_get(response)
+        result = self.sdk.point().get_point_refund_intent("refund-001")
+        self.assertEqual(200, result["status"])
+        self.assertEqual(response, result["response"])
+        self.mock_http.get.assert_called_once()
+        self.assertEqual("https://api.mercadopago.com/point/integration-api/"
+                         "refund/refund-001",
+                         self.mock_http.get.call_args.kwargs["url"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,6 +32,27 @@ class TestInvoice(BaseClientTest):
         self.assertEqual("processed", resp["results"][0]["status"])
         self.mock_http.get.assert_called_once()
 
+    def test_search_authorized_payments(self):
+        fixture = self.load_fixture("invoice_search.json")
+        self.mock_get(fixture)
+        filters = {
+            "preapproval_id": "2c938084726fca480172750000000000",
+            "payment_id": 123,
+            "payer_id": 456,
+            "status": "processed",
+            "limit": 10,
+            "offset": 5,
+        }
+        result = self.sdk.invoice().search_authorized_payments(filters)
+        self.assertEqual(200, result["status"])
+        self.assertEqual(fixture, result["response"])
+        self.mock_http.get.assert_called_once()
+        self.assertEqual(
+            self.sdk.invoice().config.api_base_url + "/authorized_payments",
+            self.mock_http.get.call_args.kwargs["url"],
+        )
+        self.assertEqual(filters, self.mock_http.get.call_args.kwargs["params"])
+
 
 if __name__ == "__main__":
     unittest.main()
