@@ -10,6 +10,7 @@ from mercadopago.resources.advanced_payment import AdvancedPayment
 from mercadopago.resources.card import Card
 from mercadopago.resources.card_token import CardToken
 from mercadopago.resources.chargeback import Chargeback
+from mercadopago.resources.claims import Claims
 from mercadopago.resources.customer import Customer
 from mercadopago.resources.disbursement_refund import DisbursementRefund
 from mercadopago.resources.identification_type import IdentificationType
@@ -60,6 +61,7 @@ from mercadopago.resources.plan import Plan
 from mercadopago.resources.point import Point
 from mercadopago.resources.preapproval import PreApproval
 from mercadopago.resources.preference import Preference
+from mercadopago.resources.qr_integrator import QRIntegrator
 from mercadopago.resources.refund import Refund
 from mercadopago.resources.shipment import (
     ShipmentAddress,
@@ -67,6 +69,7 @@ from mercadopago.resources.shipment import (
     ShipmentRequest,
 )
 from mercadopago.resources.subscription import Subscription
+from mercadopago.resources.store import Store
 from mercadopago.resources.user import User
 
 
@@ -75,6 +78,7 @@ __all__ = (
     'Card',
     'CardToken',
     'Chargeback',
+    'Claims',
     'Customer',
     'DisbursementRefund',
     'HttpClient',
@@ -116,9 +120,11 @@ __all__ = (
     'Point',
     'PreApproval',
     'Preference',
+    'QRIntegrator',
     'Refund',
     'RequestOptions',
     'Subscription',
+    'Store',
     'User',
     'order_request_to_dict',
 )

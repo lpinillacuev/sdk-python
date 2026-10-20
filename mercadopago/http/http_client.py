@@ -89,6 +89,37 @@ class HttpClient:
             backoff_factor=backoff_factor,
         )
 
+    def get_binary(self, url, headers, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
+                   retry_on=None, backoff_factor=None):
+        """Downloads raw bytes, retaining JSON error bodies for failed requests."""
+        from mercadopago.errors.exceptions import MPServerError  # avoid circular import
+
+        retry_strategy = Retry(
+            total=maxretries,
+            status_forcelist=retry_on if retry_on is not None else DEFAULT_RETRY_ON,
+            backoff_factor=backoff_factor if backoff_factor is not None else 0,
+        )
+        http = requests.Session()
+        http.mount("https://", HTTPAdapter(max_retries=retry_strategy))
+        with http as session:
+            api_result = session.request(
+                "GET", url, headers=headers, params=params, timeout=timeout,
+            )
+            if api_result.status_code < 400:
+                return api_result.content
+            if api_result.content:
+                try:
+                    body = api_result.json()
+                except ValueError as exc:
+                    raise MPServerError(
+                        api_result.status_code,
+                        {"message": "Invalid JSON in response body",
+                         "error": "invalid_response"},
+                    ) from exc
+            else:
+                body = None
+            return {"status": api_result.status_code, "response": body}
+
     def post(self, url, headers, data=None, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
              retry_on=None, backoff_factor=None):
         """Sends a POST request to the MercadoPago API."""
