@@ -21,6 +21,7 @@ from mercadopago.resources import (
     Card,
     CardToken,
     Chargeback,
+    Claims,
     Customer,
     DisbursementRefund,
     IdentificationType,
@@ -32,10 +33,12 @@ from mercadopago.resources import (
     PaymentMethods,
     Plan,
     Point,
+    QRIntegrator,
     PreApproval,
     Preference,
     Refund,
     Subscription,
+    Store,
     User,
 )
 
@@ -104,6 +107,11 @@ class SDK:  # pylint: disable=too-many-public-methods
         return Card(request_options is not None and request_options
                     or self.request_options, self.http_client)
 
+    def claims(self, request_options=None):
+        """Creates a :class:`Claims` resource to manage claim attachments."""
+        return Claims(request_options is not None and request_options
+                      or self.request_options, self.http_client)
+
     def customer(self, request_options=None):
         """Creates a :class:`Customer` resource to manage buyer profiles."""
         return Customer(request_options is not None and request_options
@@ -133,6 +141,11 @@ class SDK:  # pylint: disable=too-many-public-methods
         """Creates a :class:`Point` resource for in-person payments via Point devices."""
         return Point(request_options is not None and request_options
                      or self.request_options, self.http_client)
+
+    def qr_integrator(self, request_options=None):
+        """Creates a :class:`QRIntegrator` resource for QR integrator settings."""
+        return QRIntegrator(request_options is not None and request_options
+                            or self.request_options, self.http_client)
 
     def merchant_order(self, request_options=None):
         """Creates a :class:`MerchantOrder` resource for Checkout Pro orders."""
@@ -173,6 +186,11 @@ class SDK:  # pylint: disable=too-many-public-methods
         """Creates a :class:`User` resource to retrieve the authenticated account."""
         return User(request_options is not None and request_options
                     or self.request_options, self.http_client)
+
+    def store(self, request_options=None):
+        """Creates a :class:`Store` resource to retrieve stores."""
+        return Store(request_options is not None and request_options
+                     or self.request_options, self.http_client)
 
     def chargeback(self, request_options=None):
         """Creates a :class:`Chargeback` resource to monitor disputes."""

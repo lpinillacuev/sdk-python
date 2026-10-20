@@ -115,6 +115,23 @@ class MPBase:
             retry_on=request_options.retry_on,
         ))
 
+    def _get_binary(self, uri, filters=None, request_options=None):
+        """Performs an authenticated GET and returns the unparsed response bytes."""
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(request_options)
+
+        return self.__http_client.get_binary(
+            url=self.__config.api_base_url + uri,
+            params=filters,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        )
+
     def _post(self, uri, data=None, params=None, request_options=None):
         """Performs an authenticated POST request.
 
@@ -155,6 +172,45 @@ class MPBase:
 
         return MPResponse(self.__http_client.put(
             url=self.__config.api_base_url + uri,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
+    def _patch(self, uri, data=None, params=None, request_options=None):
+        """Performs an authenticated JSON PATCH request."""
+        if data is not None:
+            data = JSONEncoder().encode(data)
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(
+            request_options, {"Content-type": self.__config.mime_json})
+
+        return MPResponse(self.__http_client.request(
+            "PATCH",
+            url=self.__config.api_base_url + uri,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
+    def _post_multipart(self, uri, files, data=None, params=None, request_options=None):
+        """Performs an authenticated multipart POST request."""
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(request_options)
+        headers = {key: value for key, value in headers.items()
+                   if key.lower() != "content-type"}
+
+        return MPResponse(self.__http_client.request(
+            "POST",
+            url=self.__config.api_base_url + uri,
+            files=files,
             data=data,
             params=params,
             headers=headers,
