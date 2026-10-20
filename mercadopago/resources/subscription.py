@@ -102,3 +102,20 @@ class Subscription(MPBase):
             uri="/preapproval/" + self._path_param(subscription_id),
             data=subscription_object,
             request_options=request_options)
+
+    def export_subscriptions(self, collector_id, preapproval_plan_id=None,
+                             status=None, sort=None, request_options=None):
+        """Downloads subscriptions for a collector as CSV bytes."""
+        filters = {"collector_id": collector_id}
+        if preapproval_plan_id is not None:
+            filters["preapproval_plan_id"] = preapproval_plan_id
+        if status is not None:
+            filters["status"] = status
+        if sort is not None:
+            filters["sort"] = sort
+
+        return self._get_binary(
+            uri="/preapproval/export",
+            filters=filters,
+            request_options=request_options)
+
