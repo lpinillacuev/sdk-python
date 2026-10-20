@@ -80,6 +80,39 @@ class HttpClient:
 
         return response
 
+    def get_binary(self, url, headers, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
+                   retry_on=None, backoff_factor=None):
+        """Returns raw bytes for successful GETs and parsed JSON for HTTP errors.
+
+        Applies the same timeout and retry settings as JSON requests.
+        """
+        from mercadopago.errors.exceptions import MPServerError  # avoid circular import
+        retry_strategy = Retry(
+            total=maxretries,
+            status_forcelist=retry_on if retry_on is not None else DEFAULT_RETRY_ON,
+            backoff_factor=backoff_factor if backoff_factor is not None else 0,
+        )
+        http = requests.Session()
+        http.mount("https://", HTTPAdapter(max_retries=retry_strategy))
+        with http as session:
+            api_result = session.request(
+                "GET", url, headers=headers, params=params, timeout=timeout,
+            )
+            if 200 <= api_result.status_code < 300:
+                return api_result.content
+
+            response = {"status": api_result.status_code, "response": None}
+            if api_result.status_code != 204 and api_result.content:
+                try:
+                    response["response"] = api_result.json()
+                except ValueError as exc:
+                    raise MPServerError(
+                        api_result.status_code,
+                        {"message": "Invalid JSON in response body",
+                         "error": "invalid_response"},
+                    ) from exc
+            return response
+
     def get(self, url, headers, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
             retry_on=None, backoff_factor=None):
         """Sends a GET request to the MercadoPago API."""

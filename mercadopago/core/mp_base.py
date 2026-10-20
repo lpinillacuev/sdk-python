@@ -115,6 +115,25 @@ class MPBase:
             retry_on=request_options.retry_on,
         ))
 
+    def _get_binary(self, uri, filters=None, request_options=None):
+        """Performs an authenticated GET and returns the raw CSV response bytes."""
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(request_options)
+        if headers.get("Accept") == self.__config.mime_json:
+            headers["Accept"] = "text/csv"
+
+        return self.__http_client.get_binary(
+            url=self.__config.api_base_url + uri,
+            params=filters,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        )
+
     def _post(self, uri, data=None, params=None, request_options=None):
         """Performs an authenticated POST request.
 

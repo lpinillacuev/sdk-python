@@ -74,6 +74,24 @@ class TestSubscription(BaseClientTest):
         with self.assertRaises(ValueError):
             self.sdk.subscription().update("2c938084726fca480172750000000003", "not-a-dict")
 
+    def test_export_subscriptions(self):
+        from unittest.mock import MagicMock
+        from mercadopago import SDK
+        from mercadopago.http import HttpClient
+
+        client = HttpClient()
+        client.get_binary = MagicMock(return_value=b"id,status\n1,authorized\n")
+        sdk = SDK("TEST_TOKEN", http_client=client)
+        result = sdk.subscription().export_subscriptions(
+            123, preapproval_plan_id="plan-1", status="authorized", sort="date_created"
+        )
+        self.assertEqual(b"id,status\n1,authorized\n", result)
+        kwargs = client.get_binary.call_args.kwargs
+        self.assertEqual("https://api.mercadopago.com/preapproval/export", kwargs["url"])
+        self.assertEqual({"collector_id": 123, "preapproval_plan_id": "plan-1",
+                          "status": "authorized", "sort": "date_created"}, kwargs["params"])
+        client.get_binary.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

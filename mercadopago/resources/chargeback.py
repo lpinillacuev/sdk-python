@@ -42,3 +42,18 @@ class Chargeback(MPBase):
         """
         return self._get(uri="/v1/chargebacks/" + self._path_param(chargeback_id),
                          request_options=request_options)
+
+    def update_chargeback(self, chargeback_id, chargeback_object, request_options=None):
+        """Uploads documentation for a chargeback.
+
+        Args:
+            chargeback_id: Unique chargeback identifier.
+            chargeback_object: JSON object containing the ``files`` array.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Chargeback update response.
+        """
+        return self._put(uri="/v1/chargebacks/" + self._path_param(chargeback_id),
+                         data=chargeback_object, request_options=request_options)
+
