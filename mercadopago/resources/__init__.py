@@ -10,6 +10,7 @@ from mercadopago.resources.advanced_payment import AdvancedPayment
 from mercadopago.resources.card import Card
 from mercadopago.resources.card_token import CardToken
 from mercadopago.resources.chargeback import Chargeback
+from mercadopago.resources.claims import Claims
 from mercadopago.resources.customer import Customer
 from mercadopago.resources.disbursement_refund import DisbursementRefund
 from mercadopago.resources.identification_type import IdentificationType
@@ -75,6 +76,7 @@ __all__ = (
     'Card',
     'CardToken',
     'Chargeback',
+    'Claims',
     'Customer',
     'DisbursementRefund',
     'HttpClient',
