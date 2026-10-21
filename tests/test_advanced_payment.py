@@ -1,5 +1,6 @@
 """Unit tests for the AdvancedPayment resource using a mock HTTP client."""
 from datetime import datetime
+import json
 import unittest
 
 from tests.base_client_test import BaseClientTest
@@ -106,6 +107,96 @@ class TestAdvancedPayment(BaseClientTest):
     def test_update_raises_for_non_dict(self):
         with self.assertRaises(ValueError):
             self.sdk.advanced_payment().update(999, "not-a-dict")
+
+    def test_create_wallet_agreement(self):
+        self.mock_post({"agreement_id": "agr-1"}, status=200)
+        body = {"return_uri": "https://example.com/return", "external_flow_id": "flow-1"}
+
+        result = self.sdk.advanced_payment().create_wallet_agreement(
+            body, filters={"client.id": "client-1"})
+
+        self.mock_http.post.assert_called_once()
+        args, kwargs = self.mock_http.post.call_args
+        self.assertEqual((), args)
+        self.assertEqual("https://api.mercadopago.com/v2/wallet_connect/agreements",
+                         kwargs["url"])
+        self.assertEqual({"client.id": "client-1"}, kwargs["params"])
+        self.assertEqual(body, json.loads(kwargs["data"]))
+        self.assertEqual(200, result["status"])
+
+    def test_delete_wallet_agreement(self):
+        self.mock_delete(status=200)
+
+        result = self.sdk.advanced_payment().delete_wallet_agreement(
+            "agr-1", filters={"client.id": "client-1"})
+
+        self.mock_http.delete.assert_called_once()
+        args, kwargs = self.mock_http.delete.call_args
+        self.assertEqual((), args)
+        self.assertEqual("https://api.mercadopago.com/v2/wallet_connect/agreements/agr-1",
+                         kwargs["url"])
+        self.assertEqual({"client.id": "client-1"}, kwargs["params"])
+        self.assertNotIn("data", kwargs)
+        self.assertEqual(200, result["status"])
+
+    def test_get_wallet_agreement(self):
+        self.mock_get({"id": "agr-1"})
+
+        result = self.sdk.advanced_payment().get_wallet_agreement(
+            "agr-1", filters={"client.id": "client-1"})
+
+        self.mock_http.get.assert_called_once()
+        args, kwargs = self.mock_http.get.call_args
+        self.assertEqual((), args)
+        self.assertEqual("https://api.mercadopago.com/v2/wallet_connect/agreements/agr-1",
+                         kwargs["url"])
+        self.assertEqual({"client.id": "client-1"}, kwargs["params"])
+        self.assertEqual(200, result["status"])
+
+    def test_create_wallet_payer_token(self):
+        self.mock_post({"payer_token": "token-1"}, status=200)
+
+        result = self.sdk.advanced_payment().create_wallet_payer_token(
+            "agr-1", {"code": "auth-code"})
+
+        self.mock_http.post.assert_called_once()
+        args, kwargs = self.mock_http.post.call_args
+        self.assertEqual((), args)
+        self.assertEqual(
+            "https://api.mercadopago.com/v2/wallet_connect/agreements/agr-1/payer_token",
+            kwargs["url"])
+        self.assertEqual({"code": "auth-code"}, json.loads(kwargs["data"]))
+        self.assertEqual(200, result["status"])
+
+    def test_validate_wallet_coupon(self):
+        self.mock_post({"status": "active"})
+        body = {"id": "coupon-1"}
+
+        result = self.sdk.advanced_payment().validate_wallet_coupon(body, "payer-token-1")
+
+        self.mock_http.post.assert_called_once()
+        args, kwargs = self.mock_http.post.call_args
+        self.assertEqual((), args)
+        self.assertEqual("https://api.mercadopago.com/v2/wallet_connect/coupons",
+                         kwargs["url"])
+        self.assertEqual("payer-token-1", kwargs["headers"]["x-payer-token"])
+        self.assertEqual(body, json.loads(kwargs["data"]))
+        self.assertEqual(200, result["status"])
+
+    def test_create_wallet_discount(self):
+        self.mock_post({"discount": {"amount": 10.0}})
+        body = {"coupon": "coupon-1", "amount": 100.0}
+
+        result = self.sdk.advanced_payment().create_wallet_discount(body, "payer-token-1")
+
+        self.mock_http.post.assert_called_once()
+        args, kwargs = self.mock_http.post.call_args
+        self.assertEqual((), args)
+        self.assertEqual("https://api.mercadopago.com/v2/wallet_connect/discounts",
+                         kwargs["url"])
+        self.assertEqual("payer-token-1", kwargs["headers"]["x-payer-token"])
+        self.assertEqual(body, json.loads(kwargs["data"]))
+        self.assertEqual(200, result["status"])
 
 
 if __name__ == "__main__":
