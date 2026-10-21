@@ -21,6 +21,7 @@ from mercadopago.resources import (
     Card,
     CardToken,
     Chargeback,
+    Claims,
     Customer,
     DisbursementRefund,
     IdentificationType,
@@ -178,6 +179,11 @@ class SDK:  # pylint: disable=too-many-public-methods
         """Creates a :class:`Chargeback` resource to monitor disputes."""
         return Chargeback(request_options is not None and request_options
                           or self.request_options, self.http_client)
+
+    def claims(self, request_options=None):
+        """Creates a :class:`Claims` resource to manage post-purchase claims."""
+        return Claims(request_options is not None and request_options
+                      or self.request_options, self.http_client)
 
     def subscription(self, request_options=None):
         """Creates a :class:`Subscription` resource for plan-based recurring billing."""
