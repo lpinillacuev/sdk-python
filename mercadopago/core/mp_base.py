@@ -163,6 +163,94 @@ class MPBase:
             retry_on=request_options.retry_on,
         ))
 
+    def _patch(self, uri, data=None, params=None, request_options=None):
+        """Performs an authenticated JSON PATCH request.
+
+        Args:
+            uri: API path relative to the base URL.
+            data: Request body dict; JSON-encoded automatically.
+            params: Optional query-string parameters.
+            request_options: Per-call overrides; falls back to instance defaults.
+
+        Returns:
+            dict: ``{"status": <http_code>, "response": <parsed_json>}``.
+        """
+        if data is not None:
+            data = JSONEncoder().encode(data)
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(
+            request_options, {"Content-type": self.__config.mime_json})
+
+        return MPResponse(self.__http_client.request(
+            "PATCH",
+            url=self.__config.api_base_url + uri,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
+    def _post_multipart(self, uri, files, data=None, params=None, request_options=None):
+        """Performs an authenticated multipart/form-data POST request.
+
+        Args:
+            uri: API path relative to the base URL.
+            files: Mapping of form field name to file object or tuple.
+            data: Optional non-file form fields.
+            params: Optional query-string parameters.
+            request_options: Per-call overrides; falls back to instance defaults.
+
+        Returns:
+            dict: ``{"status": <http_code>, "response": <parsed_json>}``.
+        """
+        request_options = self.__check_request_options(request_options)
+        headers = {
+            key: value
+            for key, value in self.__check_headers(request_options).items()
+            if key.lower() != "content-type"
+        }
+
+        return MPResponse(self.__http_client.request(
+            "POST",
+            url=self.__config.api_base_url + uri,
+            files=files,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
+    def _get_binary(self, uri, filters=None, request_options=None):
+        """Performs an authenticated GET that returns the raw response body.
+
+        Args:
+            uri: API path relative to the base URL.
+            filters: Optional query-string parameters.
+            request_options: Per-call overrides; falls back to instance defaults.
+
+        Returns:
+            dict: ``{"status": <http_code>, "response": <bytes or parsed error>}``.
+        """
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+
+        request_options = self.__check_request_options(request_options)
+        headers = self.__check_headers(request_options)
+
+        return MPResponse(self.__http_client.get_binary(
+            url=self.__config.api_base_url + uri,
+            params=filters,
+            headers=headers,
+            timeout=request_options.connection_timeout,
+            maxretries=request_options.max_retries,
+            retry_on=request_options.retry_on,
+        ))
+
     def _delete(self, uri, params=None, request_options=None):
         """Performs an authenticated DELETE request.
 

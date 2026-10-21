@@ -32,6 +32,25 @@ class TestInvoice(BaseClientTest):
         self.assertEqual("processed", resp["results"][0]["status"])
         self.mock_http.get.assert_called_once()
 
+    def test_search_authorized_payments(self):
+        filters = {
+            "preapproval_id": "pre-001",
+            "payment_id": 123,
+            "payer_id": 456,
+            "status": "processed",
+            "limit": 10,
+            "offset": 2,
+        }
+        self.mock_get({"results": []})
+
+        result = self.sdk.invoice().search_authorized_payments(filters)
+
+        self.mock_http.get.assert_called_once()
+        _, kwargs = self.mock_http.get.call_args
+        self.assertEqual("https://api.mercadopago.com/authorized_payments", kwargs["url"])
+        self.assertEqual(filters, kwargs["params"])
+        self.assertEqual(200, result["status"])
+
 
 if __name__ == "__main__":
     unittest.main()

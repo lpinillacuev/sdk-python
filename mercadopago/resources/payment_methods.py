@@ -26,6 +26,31 @@ class PaymentMethods(MPBase):
         """
         return self._get(uri="/v1/payment_methods", request_options=request_options)
 
+    def get_installments(self, payment_method_id, amount, issuer_id=None, bin=None,
+                         request_options=None):
+        """Retrieves installment options for a payment method and amount.
+
+        Args:
+            payment_method_id: Payment method identifier.
+            amount: Transaction amount.
+            issuer_id: Optional card issuer identifier.
+            bin: Optional first six digits of the card.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Available installment plans and HTTP status.
+        """
+        filters = {"payment_method_id": payment_method_id, "amount": amount}
+        if issuer_id is not None:
+            filters["issuer_id"] = issuer_id
+        if bin is not None:
+            filters["bin"] = bin
+        return self._get(
+            uri="/v1/payment_methods/installments",
+            filters=filters,
+            request_options=request_options,
+        )
+
     @property
     def request_options(self):
         """Default :class:`RequestOptions` for this resource instance."""

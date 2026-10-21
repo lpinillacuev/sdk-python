@@ -60,3 +60,20 @@ class Invoice(MPBase):
             filters=filters,
             request_options=request_options,
         )
+
+    def search_authorized_payments(self, filters=None, request_options=None):
+        """Searches subscription invoices through the authorized payments endpoint.
+
+        Args:
+            filters: Query-string filters: ``preapproval_id``, ``payment_id``,
+                ``payer_id``, ``status``, ``limit``, and ``offset``.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: Paginated authorized payment search results.
+        """
+        return self._get(
+            uri="/authorized_payments",
+            filters=filters,
+            request_options=request_options,
+        )

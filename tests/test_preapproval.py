@@ -80,6 +80,21 @@ class TestPreApproval(BaseClientTest):
         with self.assertRaises(ValueError):
             self.sdk.preapproval().update("2c938084726fca480172750000000000", "not-a-dict")
 
+    def test_export_subscriptions(self):
+        csv_body = b"id,status\nsub-1,authorized\n"
+        self.mock_http.get_binary.return_value = {"status": 200, "response": csv_body}
+        filters = {"preapproval_plan_id": "plan-1", "status": "authorized",
+                   "sort": "date_created"}
+
+        result = self.sdk.preapproval().export_subscriptions(12345, filters=filters)
+
+        self.mock_http.get_binary.assert_called_once()
+        _, kwargs = self.mock_http.get_binary.call_args
+        self.assertEqual("https://api.mercadopago.com/preapproval/export", kwargs["url"])
+        self.assertEqual({"collector_id": 12345, **filters}, kwargs["params"])
+        self.assertEqual(200, result["status"])
+        self.assertEqual(csv_body, result["response"])
+
 
 if __name__ == "__main__":
     unittest.main()
