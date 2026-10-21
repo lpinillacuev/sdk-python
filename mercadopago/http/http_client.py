@@ -89,6 +89,43 @@ class HttpClient:
             backoff_factor=backoff_factor,
         )
 
+    def get_binary(self, url, headers, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
+                   retry_on=None, backoff_factor=None):
+        """Performs a GET and returns the raw body for successful responses.
+
+        Returns:
+            dict: ``{"status": <http_code>, "response": <bytes>}`` for 2xx
+            responses, or the parsed JSON error body (``None`` if empty) otherwise.
+
+        Raises:
+            MPServerError: When an error response body is not valid JSON.
+        """
+        from mercadopago.errors.exceptions import MPServerError  # avoid circular import
+        retry_strategy = Retry(
+            total=maxretries,
+            status_forcelist=retry_on if retry_on is not None else DEFAULT_RETRY_ON,
+            backoff_factor=backoff_factor if backoff_factor is not None else 0,
+        )
+        http = requests.Session()
+        http.mount("https://", HTTPAdapter(max_retries=retry_strategy))
+        with http as session:
+            api_result = session.request(
+                "GET", url, headers=headers, params=params, timeout=timeout)
+            response = {"status": api_result.status_code, "response": None}
+            if 200 <= api_result.status_code < 300:
+                response["response"] = api_result.content
+            elif api_result.content:
+                try:
+                    response["response"] = api_result.json()
+                except ValueError as exc:
+                    raise MPServerError(
+                        api_result.status_code,
+                        {"message": "Invalid JSON in response body",
+                         "error": "invalid_response"},
+                    ) from exc
+
+        return response
+
     def post(self, url, headers, data=None, params=None, timeout=None, maxretries=None,  # pylint: disable=too-many-positional-arguments
              retry_on=None, backoff_factor=None):
         """Sends a POST request to the MercadoPago API."""

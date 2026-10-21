@@ -10,7 +10,9 @@ from mercadopago.resources.advanced_payment import AdvancedPayment
 from mercadopago.resources.card import Card
 from mercadopago.resources.card_token import CardToken
 from mercadopago.resources.chargeback import Chargeback
+from mercadopago.resources.claims import Claims
 from mercadopago.resources.customer import Customer
+from mercadopago.resources.customer_address import CustomerAddress
 from mercadopago.resources.disbursement_refund import DisbursementRefund
 from mercadopago.resources.identification_type import IdentificationType
 from mercadopago.resources.invoice import Invoice
@@ -56,18 +58,27 @@ from mercadopago.resources.payer import (
 )
 from mercadopago.resources.payment import Payment
 from mercadopago.resources.payment_methods import PaymentMethods
+from mercadopago.resources.payouts import Payouts
 from mercadopago.resources.plan import Plan
 from mercadopago.resources.point import Point
+from mercadopago.resources.pos import POS
 from mercadopago.resources.preapproval import PreApproval
 from mercadopago.resources.preference import Preference
 from mercadopago.resources.refund import Refund
+from mercadopago.resources.releases_report import ReleasesReport
+from mercadopago.resources.qr_integrator import QRIntegrator
+from mercadopago.resources.qr_orders import QROrders
 from mercadopago.resources.shipment import (
     ShipmentAddress,
     ShipmentFreeMethod,
     ShipmentRequest,
 )
+from mercadopago.resources.stores import Stores
+from mercadopago.resources.settlements_report import SettlementsReport
 from mercadopago.resources.subscription import Subscription
+from mercadopago.resources.terminals import Terminals as Terminals
 from mercadopago.resources.user import User
+from mercadopago.resources.wallet_connect import WalletConnect
 
 
 __all__ = (
@@ -75,7 +86,9 @@ __all__ = (
     'Card',
     'CardToken',
     'Chargeback',
+    'Claims',
     'Customer',
+    'CustomerAddress',
     'DisbursementRefund',
     'HttpClient',
     'IdentificationType',
@@ -112,13 +125,22 @@ __all__ = (
     'OrderTransactionSecurity',
     'Payment',
     'PaymentMethods',
+    'Payouts',
     'Plan',
     'Point',
+    'POS',
     'PreApproval',
     'Preference',
     'Refund',
+    'ReleasesReport',
+    'SettlementsReport',
+    'QRIntegrator',
+    'QROrders',
     'RequestOptions',
+    'Stores',
     'Subscription',
+    'Terminals',
     'User',
+    'WalletConnect',
     'order_request_to_dict',
 )

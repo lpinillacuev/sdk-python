@@ -1,4 +1,5 @@
 """Unit tests for the Chargeback resource using a mock HTTP client."""
+import json
 import unittest
 
 from tests.base_client_test import BaseClientTest
@@ -31,6 +32,21 @@ class TestChargeback(BaseClientTest):
         self.assertEqual("cb-001", resp["results"][0]["id"])
         self.assertEqual(17014025134, resp["results"][0]["payment_id"])
         self.mock_http.get.assert_called_once()
+
+    def test_update_chargeback(self):
+        payload = {"files": [{"description": "Receipt", "name": "receipt.pdf",
+                              "url": "https://example.com/receipt.pdf"}]}
+        response = {"id": "cb-001"}
+        self.mock_put(response)
+
+        result = self.sdk.chargeback().update_chargeback("cb-001", payload)
+
+        self.mock_http.put.assert_called_once()
+        _, kwargs = self.mock_http.put.call_args
+        self.assertEqual("https://api.mercadopago.com/v1/chargebacks/cb-001", kwargs["url"])
+        self.assertEqual(payload, json.loads(kwargs["data"]))
+        self.assertEqual(200, result["status"])
+        self.assertEqual(response, result["response"])
 
 
 if __name__ == "__main__":
