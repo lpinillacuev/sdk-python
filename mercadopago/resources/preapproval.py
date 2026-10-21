@@ -99,3 +99,24 @@ class PreApproval(MPBase):
     def search_auto_paging_iter(self, filters=None, request_options=None, limit=100):
         """Lazily yields all items matching *filters* across all pages."""
         return _paging_iter(self.search, filters, request_options, limit)
+
+    def export_subscriptions(self, collector_id, filters=None, request_options=None):
+        """Exports subscriptions as CSV for the given collector.
+
+        Args:
+            collector_id: Required seller user ID.
+            filters: Optional query filters for plan ID, status and sort order.
+            request_options: Per-call configuration overrides.
+
+        Returns:
+            dict: HTTP status and CSV response bytes.
+        """
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("Filters must be a Dictionary")
+
+        params = {"collector_id": collector_id}
+        if filters is not None:
+            params.update(filters)
+        return self._get_binary(uri="/preapproval/export", filters=params,
+                                request_options=request_options)
+

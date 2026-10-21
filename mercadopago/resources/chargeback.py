@@ -42,3 +42,23 @@ class Chargeback(MPBase):
         """
         return self._get(uri="/v1/chargebacks/" + self._path_param(chargeback_id),
                          request_options=request_options)
+
+    def update_chargeback(self, chargeback_id, chargeback_object, request_options=None):
+        """Updates the documentation files for a chargeback.
+
+        Args:
+            chargeback_id: Unique chargeback identifier.
+            chargeback_object (dict): JSON body containing the documentation files.
+            request_options: Per-call configuration overrides.
+
+        Raises:
+            ValueError: If chargeback_object is not a Dictionary.
+
+        Returns:
+            dict: Chargeback update response.
+        """
+        if not isinstance(chargeback_object, dict):
+            raise ValueError("Param chargeback_object must be a Dictionary")
+
+        return self._put(uri="/v1/chargebacks/" + self._path_param(chargeback_id),
+                         data=chargeback_object, request_options=request_options)
